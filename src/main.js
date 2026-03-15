@@ -545,42 +545,56 @@ function checkVoiceAnswer(transcript) {
   rawTranscript = rawTranscript.replace(/free speech/gi, "freedom of speech");
   rawTranscript = rawTranscript.replace(/free religion/gi, "freedom of religion");
   rawTranscript = rawTranscript.replace(/george washington/gi, "washington");
+  rawTranscript = rawTranscript.replace(/jefferson/gi, "thomas jefferson");
+  rawTranscript = rawTranscript.replace(/hamilton/gi, "alexander hamilton");
+  rawTranscript = rawTranscript.replace(/madison/gi, "james madison");
+  rawTranscript = rawTranscript.replace(/roosevelt/gi, "franklin roosevelt");
+  rawTranscript = rawTranscript.replace(/lincoln/gi, "abraham lincoln");
 
   const userText = normalize(rawTranscript);
-  let isCorrect = false;
 
   const getKeywords = (str) => {
     const stops = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'to', 'for', 'in', 'on', 'of', 'and', 'or', 'by', 'with']);
     return str.split(' ').filter(w => w.length > 2 && !stops.has(w));
   };
 
+  const getRequiredCount = (cond) => {
+    if (!cond) return 1;
+    const match = cond.match(/Name (\w+)/i);
+    if (!match) return 1;
+    const words = {
+      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+    };
+    return words[match[1].toLowerCase()] || 1;
+  };
+
+  const requiredCount = getRequiredCount(q.special_conditions);
+  const matchedAnswers = new Set();
+
   for (const ans of q.answers) {
     const normAns = normalize(ans);
+    let matchFound = false;
+
     // 1. Direct or robust substring match
     if (userText.includes(normAns) || (normAns.includes(userText) && userText.length > 4)) {
-      isCorrect = true;
-      break;
+      matchFound = true;
+    } else {
+      // 2. Fuzzy Keyword matching approach
+      const ansKeywords = getKeywords(normAns);
+      if (ansKeywords.length > 0) {
+        const matchCount = ansKeywords.filter(kw => userText.includes(kw)).length;
+        if (matchCount === ansKeywords.length || (ansKeywords.length >= 3 && matchCount >= ansKeywords.length - 1)) {
+          matchFound = true;
+        }
+      }
     }
 
-    // 2. Fuzzy Keyword matching approach
-    const ansKeywords = getKeywords(normAns);
-    if (ansKeywords.length > 0) {
-      // How many of the answer's key words did the user say?
-      const matchCount = ansKeywords.filter(kw => userText.includes(kw)).length;
-
-      // If they hit all the core keywords, count it!
-      if (matchCount === ansKeywords.length) {
-        isCorrect = true;
-        break;
-      }
-
-      // Allow 1 missing keyword if the answer has 3 or more keywords
-      if (ansKeywords.length >= 3 && matchCount >= ansKeywords.length - 1) {
-        isCorrect = true;
-        break;
-      }
+    if (matchFound) {
+      matchedAnswers.add(ans);
     }
   }
+
+  const isCorrect = matchedAnswers.size >= requiredCount;
 
   const condEl = document.getElementById('q-conditions');
   const condTextEl = document.getElementById('q-conditions-text');
