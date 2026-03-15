@@ -1224,7 +1224,7 @@ function checkN400Answer(transcript) {
   } else if (q.type === 'no') {
     isCorrect = t.includes('no') || t.includes('not') || t.includes('never');
   } else if (q.type === 'no_or_open') {
-    isCorrect = t.length > 2; // Accept anything substantial
+    isCorrect = t.length >= 2; // Accept 'no' or any name
     expectedTypeLabel = "YES or NO (or other names)";
   } else if (q.type === 'keywords') {
     isCorrect = q.keywords.some(k => t.includes(k.toLowerCase()));
