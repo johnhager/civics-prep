@@ -15,6 +15,30 @@ let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; //
 // DOM Elements
 const app = document.querySelector('#app');
 
+// Speech Recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    checkVoiceAnswer(transcript);
+  };
+
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error", event.error);
+    stopListeningUI();
+  };
+
+  recognition.onend = () => {
+    stopListeningUI();
+  };
+}
+
 function renderApp() {
   app.innerHTML = `
     <header>
@@ -271,13 +295,79 @@ function speakQuestion() {
   if (isPracticeTest && activeQuestions.length === 0) return;
 
   window.speechSynthesis.cancel(); // Stop any current speech
+  if (recognition) recognition.stop();
+  stopListeningUI();
+
   const q = activeQuestions[currentIndex];
   // Filter out any markdown-like characters that might read awkwardly if present
   const textToRead = q.question.replace(/[*_]/g, '');
   const utterance = new SpeechSynthesisUtterance(textToRead);
   utterance.lang = 'en-US';
   utterance.rate = 0.9; // Slightly slower for clarity
+
+  if (isAutoPlay && recognition) {
+    utterance.onend = () => {
+      startListening();
+    };
+  }
+
   window.speechSynthesis.speak(utterance);
+}
+
+function startListening() {
+  if (!recognition) return;
+  try {
+    recognition.start();
+    const audioBtn = document.getElementById('audio-btn');
+    audioBtn.classList.add('listening');
+    audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+  } catch (e) {
+    console.error("Could not start recognition", e);
+  }
+}
+
+function stopListeningUI() {
+  const audioBtn = document.getElementById('audio-btn');
+  if (audioBtn) {
+    audioBtn.classList.remove('listening');
+    audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+  }
+}
+
+function checkVoiceAnswer(transcript) {
+  const q = activeQuestions[currentIndex];
+  if (!q) return;
+
+  const normalize = (str) => {
+    return str.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+  };
+
+  const userText = normalize(transcript);
+  let isCorrect = false;
+
+  for (const ans of q.answers) {
+    const normAns = normalize(ans);
+    if (userText.includes(normAns) || (normAns.includes(userText) && userText.length > 3)) {
+      isCorrect = true;
+      break;
+    }
+  }
+
+  const condEl = document.getElementById('q-conditions');
+  const condTextEl = document.getElementById('q-conditions-text');
+
+  condEl.classList.remove('hidden');
+  condEl.className = 'special-conditions voice-feedback';
+  condEl.style.backgroundColor = isCorrect ? 'var(--color-green-light)' : 'var(--color-red-light)';
+  condEl.style.color = isCorrect ? '#047857' : '#B91C1C';
+  condTextEl.innerHTML = `🎙️ Heard: <i>"${transcript}"</i>`;
+
+  if (isCorrect) {
+    if (!isRevealed) revealAnswer();
+    setTimeout(() => {
+      markAnswer('right');
+    }, 1500); // give them a sec to see it was correct
+  }
 }
 
 function updateCard() {
@@ -293,11 +383,19 @@ function updateCard() {
 
   // Stop speech if we navigate away
   window.speechSynthesis.cancel();
+  if (recognition) recognition.stop();
+  stopListeningUI();
 
   const idEl = document.getElementById('q-id');
   const catEl = document.getElementById('q-category');
   const textEl = document.getElementById('q-text');
   const condEl = document.getElementById('q-conditions');
+
+  // reset styles
+  condEl.style.backgroundColor = '';
+  condEl.style.color = '';
+  condEl.className = 'special-conditions hidden';
+
   const condTextEl = document.getElementById('q-conditions-text');
   const ansContainer = document.getElementById('answers-container');
   const ansList = document.getElementById('answers-list');
