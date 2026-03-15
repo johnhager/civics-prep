@@ -290,6 +290,23 @@ function toggleAutoPlay() {
   }
 }
 
+function setPremiumVoice(utterance) {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+
+  // Try to find a high-quality iOS/Mac/Android voice
+  const bestVoice = voices.find(v => v.name.includes("Samantha") && v.name.includes("Enhanced")) ||
+    voices.find(v => v.name.includes("Samantha")) ||
+    voices.find(v => v.name.toLowerCase().includes("siri") && v.lang.includes("en-US")) ||
+    voices.find(v => v.name.includes("Aaron") || v.name.includes("Nicky")) ||
+    voices.find(v => v.lang === "en-US" && v.name.includes("Google")) ||
+    voices.find(v => v.lang === "en-US");
+
+  if (bestVoice) {
+    utterance.voice = bestVoice;
+  }
+}
+
 function speakQuestion() {
   // Wait to speak if they just finished the test
   if (isPracticeTest && activeQuestions.length === 0) return;
@@ -304,6 +321,7 @@ function speakQuestion() {
   const utterance = new SpeechSynthesisUtterance(textToRead);
   utterance.lang = 'en-US';
   utterance.rate = 0.9; // Slightly slower for clarity
+  setPremiumVoice(utterance);
 
   if (isAutoPlay && recognition) {
     utterance.onend = () => {
@@ -370,6 +388,7 @@ function checkVoiceAnswer(transcript) {
     const msg = new SpeechSynthesisUtterance("Correct.");
     msg.lang = 'en-US';
     msg.rate = 1.0;
+    setPremiumVoice(msg);
     msg.onend = () => markAnswer('right');
     window.speechSynthesis.speak(msg);
   } else {
@@ -377,6 +396,7 @@ function checkVoiceAnswer(transcript) {
     const msg = new SpeechSynthesisUtterance("Needs review. Acceptable answers are: " + answersText);
     msg.lang = 'en-US';
     msg.rate = 0.9;
+    setPremiumVoice(msg);
     msg.onend = () => markAnswer('wrong');
     window.speechSynthesis.speak(msg);
   }
