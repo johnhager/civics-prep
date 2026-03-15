@@ -204,40 +204,40 @@ function updateCard() {
   // Optional status badge from previous progress
   const pastStatus = userProgress[q.id];
   if (pastStatus) {
-    idEl.className = \`question-id status-\${pastStatus}\`;
+    idEl.className = `question-id status-${pastStatus}`;
   } else {
     idEl.className = 'question-id';
   }
-  
+
   if (q.special_conditions) {
     condEl.classList.remove('hidden');
     condTextEl.textContent = q.special_conditions;
   } else {
     condEl.classList.add('hidden');
   }
-  
+
   // Reset answers space
   ansList.innerHTML = '';
   q.answers.forEach(ans => {
     const div = document.createElement('div');
     div.className = 'answer-item';
-    div.innerHTML = \`<span class="answer-bullet">•</span> <span>\${ans}</span>\`;
+    div.innerHTML = `<span class="answer-bullet">•</span> <span>${ans}</span>`;
     ansList.appendChild(div);
   });
-  
+
   ansContainer.classList.add('hidden');
   revealBtn.style.display = 'block';
-  
+
   // Animation reset
   const card = document.querySelector('.card');
   card.classList.remove('animate-fade-in');
   void card.offsetWidth; // trigger reflow
   card.classList.add('animate-fade-in');
-  
+
   // Update controls
   prevBtn.disabled = currentIndex === 0;
   nextBtn.disabled = currentIndex === activeQuestions.length - 1;
-  progressEl.textContent = \`\${currentIndex + 1} / \${activeQuestions.length}\`;
+  progressEl.textContent = `${currentIndex + 1} / ${activeQuestions.length}`;
 }
 
 function revealAnswer() {
@@ -252,10 +252,10 @@ function markAnswer(status) {
   userProgress[q.id] = status;
   localStorage.setItem('civics-progress', JSON.stringify(userProgress));
   updateScoreboard();
-  
+
   const idEl = document.getElementById('q-id');
-  idEl.className = \`question-id status-\${status}\`;
-  
+  idEl.className = `question-id status-${status}`;
+
   // Automatically move to the next question if possible
   if (currentIndex < activeQuestions.length - 1) {
     setTimeout(nextQuestion, 250); // slight delay to feel the click
