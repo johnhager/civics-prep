@@ -53,57 +53,57 @@ function renderMainMenu() {
   window.speechSynthesis.cancel();
 
   app.innerHTML = `
-    <header>
+  < header >
       <h1>US Civics Prep</h1>
       <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
-    </header>
-    
-    <div class="menu-container">
-      <div class="menu-card" id="go-civics">
-        <div class="menu-card-icon">🏛️</div>
-        <div class="menu-card-content">
-          <h3>Civics Study Flashcards</h3>
-          <p>Practice the 128 official questions or take a randomized 20-question practice exam.</p>
-        </div>
-      </div>
-      
-      <div class="menu-card" id="go-reading">
-        <div class="menu-card-icon">📖</div>
-        <div class="menu-card-content">
-          <h3>Reading Test Practice</h3>
-          <p>Practice reading English sentences aloud with precise voice recognition grading.</p>
-        </div>
-      </div>
-      
-      <div class="menu-card" id="go-writing">
-        <div class="menu-card-icon">✍️</div>
-        <div class="menu-card-content">
-          <h3>Writing Test Practice</h3>
-          <p>Listen to an English sentence and practice typing it out correctly.</p>
-        </div>
-      </div>
-      
-      <div class="menu-card" id="go-n400">
-        <div class="menu-card-icon">🇺🇸</div>
-        <div class="menu-card-content">
-          <h3>N-400 Review Simulator</h3>
-          <p>Mock interview covering your application and the 'Yes/No' moral character questions.</p>
-        </div>
-      </div>
-      
-      <div class="menu-card" id="go-full-mock">
-        <div class="menu-card-icon">🎓</div>
-        <div class="menu-card-content">
-          <h3>Full Mock Interview</h3>
-          <p>A back-to-back simulation of all four interview components.</p>
-        </div>
+    </header >
+
+  <div class="menu-container">
+    <div class="menu-card" id="go-civics">
+      <div class="menu-card-icon">🏛️</div>
+      <div class="menu-card-content">
+        <h3>Civics Study Flashcards</h3>
+        <p>Practice the 128 official questions or take a randomized 20-question practice exam.</p>
       </div>
     </div>
-  `;
+
+    <div class="menu-card" id="go-reading">
+      <div class="menu-card-icon">📖</div>
+      <div class="menu-card-content">
+        <h3>Reading Test Practice</h3>
+        <p>Practice reading English sentences aloud with precise voice recognition grading.</p>
+      </div>
+    </div>
+
+    <div class="menu-card" id="go-writing">
+      <div class="menu-card-icon">✍️</div>
+      <div class="menu-card-content">
+        <h3>Writing Test Practice</h3>
+        <p>Listen to an English sentence and practice typing it out correctly.</p>
+      </div>
+    </div>
+
+    <div class="menu-card" id="go-n400">
+      <div class="menu-card-icon">🇺🇸</div>
+      <div class="menu-card-content">
+        <h3>N-400 Review Simulator</h3>
+        <p>Mock interview covering your application and the 'Yes/No' moral character questions.</p>
+      </div>
+    </div>
+
+    <div class="menu-card" id="go-full-mock">
+      <div class="menu-card-icon">🎓</div>
+      <div class="menu-card-content">
+        <h3>Full Mock Interview</h3>
+        <p>A back-to-back simulation of all four interview components.</p>
+      </div>
+    </div>
+  </div>
+`;
 
   document.getElementById('go-civics').addEventListener('click', renderCivicsApp);
   document.getElementById('go-reading').addEventListener('click', renderReadingTest);
-  document.getElementById('go-writing').addEventListener('click', () => alert("Coming soon!"));
+  document.getElementById('go-writing').addEventListener('click', renderWritingTest);
   document.getElementById('go-n400').addEventListener('click', () => alert("Coming soon!"));
   document.getElementById('go-full-mock').addEventListener('click', () => alert("Coming soon!"));
 }
@@ -111,10 +111,10 @@ function renderMainMenu() {
 function renderCivicsApp() {
   appMode = 'civics';
   app.innerHTML = `
-    <header>
+  < header >
       <h1>US Civics Prep</h1>
       <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
-    </header>
+    </header >
     
     <div class="back-btn-container">
       <button class="back-btn" id="back-to-menu-btn">
@@ -196,7 +196,7 @@ function renderCivicsApp() {
         <button id="next-btn" class="btn btn-secondary" disabled>Next →</button>
       </div>
     </div>
-  `;
+`;
 
   // Bind events
   document.getElementById('back-to-menu-btn').addEventListener('click', renderMainMenu);
@@ -423,7 +423,7 @@ function startListening() {
     const audioBtn = document.getElementById('audio-btn');
     if (audioBtn) {
       audioBtn.classList.add('listening');
-      audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+      audioBtn.innerHTML = `< svg width = "24" height = "24" viewBox = "0 0 24 24" fill = "none" stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" ><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg > `;
     }
 
     // For Reading Test UI
@@ -442,7 +442,7 @@ function stopListeningUI() {
   const audioBtn = document.getElementById('audio-btn');
   if (audioBtn) {
     audioBtn.classList.remove('listening');
-    audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+    audioBtn.innerHTML = `< svg width = "24" height = "24" viewBox = "0 0 24 24" fill = "none" stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" ><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg > `;
   }
 
   const readBtn = document.getElementById('r-audio-btn');
@@ -569,14 +569,14 @@ function updateCard() {
   const nextBtn = document.getElementById('next-btn');
   const progressEl = document.getElementById('progress');
 
-  idEl.textContent = `#${q.id}`;
+  idEl.textContent = `#${q.id} `;
   catEl.textContent = q.category;
   textEl.textContent = q.question;
 
   // Optional status badge from previous progress
   const pastStatus = userProgress[q.id];
   if (pastStatus) {
-    idEl.className = `question-id status-${pastStatus}`;
+    idEl.className = `question - id status - ${pastStatus} `;
   } else {
     idEl.className = 'question-id';
   }
@@ -593,7 +593,7 @@ function updateCard() {
   q.answers.forEach(ans => {
     const div = document.createElement('div');
     div.className = 'answer-item';
-    div.innerHTML = `<span class="answer-bullet">•</span> <span>${ans}</span>`;
+    div.innerHTML = `< span class="answer-bullet" >•</span > <span>${ans}</span>`;
     ansList.appendChild(div);
   });
 
@@ -845,6 +845,178 @@ function checkReadingAnswer(transcript) {
     setPremiumVoice(msg);
     window.speechSynthesis.speak(msg);
   }
+}
+
+// --- Writing Test Logic ---
+let writingQuestions = [];
+let currentWritingIndex = 0;
+
+function renderWritingTest() {
+  appMode = 'writing';
+  if (recognition) recognition.stop();
+  window.speechSynthesis.cancel();
+
+  app.innerHTML = `
+    <header>
+      <h1>Writing Test</h1>
+      <p>Listen to the sentence and write it precisely.</p>
+    </header>
+    
+    <div class="back-btn-container">
+      <button class="back-btn" id="back-to-menu-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Menu
+      </button>
+    </div>
+
+    <div class="flashcard-container">
+      <div class="card">
+        <div style="text-align:center; padding: 1.5rem 0;">
+           <button id="w-audio-btn" class="audio-btn" style="margin: 0 auto; width: 64px; height: 64px;">
+             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+           </button>
+           <p style="margin-top: 1rem; color: var(--color-text-muted); font-weight: 500;">Tap to Listen</p>
+        </div>
+        
+        <div style="margin-top: 0.5rem;">
+           <textarea id="w-input" class="w-input" placeholder="Type what you hear here..." rows="3" style="width: 100%; box-sizing: border-box; font-family: var(--font-sans); font-size: 1.25rem; padding: 1rem; border-radius: var(--radius-sm); border: 2px solid var(--color-border); outline: none; resize: none;"></textarea>
+           <p id="w-validation" style="color: #B91C1C; font-size: 0.875rem; margin-top: 0.5rem; display: none;">Check your spelling and try again.</p>
+        </div>
+
+        <div class="special-conditions hidden" id="w-conditions" style="margin-top: 1rem;">
+           <span id="w-conditions-text"></span>
+        </div>
+
+        <button id="w-check-btn" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Check Answer</button>
+        <button id="w-reveal-btn" class="btn btn-secondary" style="margin-top: 0.5rem; width: 100%;">Show Answer</button>
+      </div>
+      
+      <div class="controls">
+        <button id="w-prev-btn" class="btn btn-secondary" disabled>← Previous</button>
+        <div id="w-progress" class="progress">-- / --</div>
+        <button id="w-next-btn" class="btn btn-secondary" disabled>Next →</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('back-to-menu-btn').addEventListener('click', renderMainMenu);
+
+  document.getElementById('w-audio-btn').addEventListener('click', () => {
+    const q = writingQuestions[currentWritingIndex];
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(q.question);
+    msg.lang = 'en-US';
+    msg.rate = 0.8;
+    setPremiumVoice(msg);
+    window.speechSynthesis.speak(msg);
+  });
+
+  document.getElementById('w-check-btn').addEventListener('click', checkWritingAnswer);
+  document.getElementById('w-reveal-btn').addEventListener('click', revealWritingAnswer);
+
+  document.getElementById('w-prev-btn').addEventListener('click', () => {
+    if (currentWritingIndex > 0) { currentWritingIndex--; updateWritingCard(); }
+  });
+  document.getElementById('w-next-btn').addEventListener('click', () => {
+    if (currentWritingIndex < writingQuestions.length - 1) { currentWritingIndex++; updateWritingCard(); }
+  });
+
+  loadWritingData();
+}
+
+async function loadWritingData() {
+  try {
+    const res = await fetch('/data/writing_questions.json');
+    if (!res.ok) throw new Error('Failed to fetch writing data');
+    writingQuestions = await res.json();
+    currentWritingIndex = 0;
+    updateWritingCard();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function updateWritingCard() {
+  if (writingQuestions.length === 0) return;
+  document.getElementById('w-input').value = "";
+  document.getElementById('w-validation').style.display = "none";
+  document.getElementById('w-input').disabled = false;
+
+  const condEl = document.getElementById('w-conditions');
+  condEl.classList.add('hidden');
+  condEl.className = 'special-conditions hidden';
+  condEl.style.backgroundColor = '';
+  condEl.style.color = '';
+
+  document.getElementById('w-reveal-btn').style.display = "block";
+  document.getElementById('w-check-btn').style.display = "block";
+
+  document.getElementById('w-prev-btn').disabled = currentWritingIndex === 0;
+  document.getElementById('w-next-btn').disabled = currentWritingIndex === writingQuestions.length - 1;
+  document.getElementById('w-progress').textContent = `${currentWritingIndex + 1} / ${writingQuestions.length}`;
+}
+
+function checkWritingAnswer() {
+  const q = writingQuestions[currentWritingIndex];
+  const userText = document.getElementById('w-input').value;
+
+  // Normalize both by removing case and strictly non-word characters for a lenient compare
+  const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+
+  const isCorrect = normalize(userText) === normalize(q.question);
+
+  if (isCorrect) {
+    document.getElementById('w-validation').style.display = "none";
+    const condEl = document.getElementById('w-conditions');
+    const condTextEl = document.getElementById('w-conditions-text');
+
+    condEl.classList.remove('hidden');
+    condEl.className = 'special-conditions voice-feedback';
+    condEl.style.backgroundColor = 'var(--color-green-light)';
+    condEl.style.color = '#047857';
+    condTextEl.innerHTML = `✅ Correct! <i>"${q.question}"</i>`;
+
+    document.getElementById('w-input').disabled = true;
+    document.getElementById('w-check-btn').style.display = "none";
+    document.getElementById('w-reveal-btn').style.display = "none";
+
+    const msg = new SpeechSynthesisUtterance("Correct.");
+    msg.lang = 'en-US';
+    msg.rate = 1.0;
+    setPremiumVoice(msg);
+    window.speechSynthesis.speak(msg);
+
+    setTimeout(() => {
+      if (currentWritingIndex < writingQuestions.length - 1) {
+        currentWritingIndex++;
+        updateWritingCard();
+      }
+    }, 2000);
+  } else {
+    document.getElementById('w-validation').style.display = "block";
+    const msg = new SpeechSynthesisUtterance("Needs review. Try again.");
+    msg.lang = 'en-US';
+    msg.rate = 1.0;
+    setPremiumVoice(msg);
+    window.speechSynthesis.speak(msg);
+  }
+}
+
+function revealWritingAnswer() {
+  const q = writingQuestions[currentWritingIndex];
+
+  const condEl = document.getElementById('w-conditions');
+  const condTextEl = document.getElementById('w-conditions-text');
+
+  condEl.classList.remove('hidden');
+  condEl.className = 'special-conditions voice-feedback';
+  condEl.style.backgroundColor = 'var(--color-accent)';
+  condEl.style.color = 'var(--color-primary)';
+  condTextEl.innerHTML = `📝 Answer: <b>${q.question}</b>`;
+
+  document.getElementById('w-input').disabled = true;
+  document.getElementById('w-check-btn').style.display = "none";
+  document.getElementById('w-reveal-btn').style.display = "none";
 }
 
 // Initialize
