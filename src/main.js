@@ -644,7 +644,13 @@ function updateCard() {
   q.answers.forEach(ans => {
     const div = document.createElement('div');
     div.className = 'answer-item';
-    div.innerHTML = `<span class="answer-bullet">•</span> <span>${ans}</span>`;
+    const bullet = document.createElement('span');
+    bullet.className = 'answer-bullet';
+    bullet.textContent = '•';
+    const text = document.createElement('span');
+    text.textContent = ans;
+    div.appendChild(bullet);
+    div.appendChild(text);
     ansList.appendChild(div);
   });
 
