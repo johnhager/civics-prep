@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "question": "Washington was the first President."
+    },
+    {
+        "id": 2,
+        "question": "Washington D.C. is the capital of the United States."
+    },
+    {
+        "id": 3,
+        "question": "Lincoln was the President during the Civil War."
+    },
+    {
+        "id": 4,
+        "question": "Independence Day is in July."
+    },
+    {
+        "id": 5,
+        "question": "The President lives in the White House."
+    },
+    {
+        "id": 6,
+        "question": "Congress meets in Washington."
+    },
+    {
+        "id": 7,
+        "question": "The United States has fifty states."
+    },
+    {
+        "id": 8,
+        "question": "The flag is red, white, and blue."
+    },
+    {
+        "id": 9,
+        "question": "People come here to be free."
+    },
+    {
+        "id": 10,
+        "question": "Alaska is the largest state."
+    },
+    {
+        "id": 11,
+        "question": "Thanksgiving is in November."
+    },
+    {
+        "id": 12,
+        "question": "Citizens elect Congress."
+    },
+    {
+        "id": 13,
+        "question": "We pay taxes."
+    },
+    {
+        "id": 14,
+        "question": "Labor Day is in September."
+    },
+    {
+        "id": 15,
+        "question": "Washington is the Father of Our Country."
+    }
+]

@@ -58,10 +58,10 @@ function renderMainMenu() {
   window.speechSynthesis.cancel();
 
   app.innerHTML = `
-  < header >
+    <header>
       <h1>US Civics Prep</h1>
       <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
-    </header >
+    </header>
 
   <div class="menu-container">
     <div class="menu-card" id="go-civics">
@@ -145,10 +145,10 @@ function advanceMockPhase() {
 function renderCivicsApp() {
   appMode = 'civics';
   app.innerHTML = `
-  < header >
+    <header>
       <h1>US Civics Prep</h1>
       <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
-    </header >
+    </header>
     
     <div class="back-btn-container">
       <button class="back-btn" id="back-to-menu-btn">
@@ -457,7 +457,7 @@ function startListening() {
     const audioBtn = document.getElementById('audio-btn');
     if (audioBtn) {
       audioBtn.classList.add('listening');
-      audioBtn.innerHTML = `< svg width = "24" height = "24" viewBox = "0 0 24 24" fill = "none" stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" ><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg > `;
+      audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
     }
 
     // For Reading Test UI
@@ -485,7 +485,7 @@ function stopListeningUI() {
   const audioBtn = document.getElementById('audio-btn');
   if (audioBtn) {
     audioBtn.classList.remove('listening');
-    audioBtn.innerHTML = `< svg width = "24" height = "24" viewBox = "0 0 24 24" fill = "none" stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" ><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg > `;
+    audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
   }
 
   const readBtn = document.getElementById('r-audio-btn');
@@ -775,10 +775,10 @@ function showPracticeResults() {
 function renderReadingTest() {
   appMode = 'reading';
   app.innerHTML = `
-  < header >
+    <header>
       <h1>Reading Test</h1>
       <p>Please read the following sentence aloud.</p>
-    </header >
+    </header>
     
     <div class="back-btn-container">
       <button class="back-btn" id="back-to-menu-btn">

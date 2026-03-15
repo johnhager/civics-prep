@@ -1,0 +1,182 @@
+[
+    {
+        "id": 1,
+        "category": "Background",
+        "question": "What is your current legal name?",
+        "type": "open"
+    },
+    {
+        "id": 2,
+        "category": "Background",
+        "question": "Have you used any other names since birth?",
+        "type": "open"
+    },
+    {
+        "id": 3,
+        "category": "Background",
+        "question": "What is your date of birth?",
+        "type": "open"
+    },
+    {
+        "id": 4,
+        "category": "Background",
+        "question": "Are you currently employed? What do you do?",
+        "type": "open"
+    },
+    {
+        "id": 5,
+        "category": "Background",
+        "question": "Have you taken any trips outside the United States that lasted longer than 24 hours in the past 5 years?",
+        "type": "open"
+    },
+    {
+        "id": 6,
+        "category": "Part 10",
+        "question": "Have you ever claimed to be a U.S. citizen?",
+        "type": "no"
+    },
+    {
+        "id": 7,
+        "category": "Part 10",
+        "question": "Have you ever registered to vote in any Federal, state, or local election in the United States?",
+        "type": "no"
+    },
+    {
+        "id": 8,
+        "category": "Part 10",
+        "question": "Have you ever voted in any Federal, state, or local election in the United States?",
+        "type": "no"
+    },
+    {
+        "id": 9,
+        "category": "Part 10",
+        "question": "Do you owe any overdue Federal, state, or local taxes?",
+        "type": "no"
+    },
+    {
+        "id": 10,
+        "category": "Part 10",
+        "question": "Have you ever been a member of, or in any way associated with, the Communist Party?",
+        "type": "no"
+    },
+    {
+        "id": 11,
+        "category": "Part 10",
+        "question": "Have you ever advocated the direct or indirect overthrow of any government by force or violence?",
+        "type": "no"
+    },
+    {
+        "id": 12,
+        "category": "Part 10",
+        "question": "Have you ever been arrested, cited, or detained by any law enforcement officer for any reason?",
+        "type": "open"
+    },
+    {
+        "id": 13,
+        "category": "Part 10",
+        "question": "Have you ever been a habitual drunkard?",
+        "type": "no"
+    },
+    {
+        "id": 14,
+        "category": "Part 10",
+        "question": "Have you ever been a prostitute, or procured anyone for prostitution?",
+        "type": "no"
+    },
+    {
+        "id": 15,
+        "category": "Part 10",
+        "question": "Have you ever sold or smuggled controlled substances, illegal drugs, or narcotics?",
+        "type": "no"
+    },
+    {
+        "id": 16,
+        "category": "Part 10",
+        "question": "Have you ever married someone in order to obtain an immigration benefit?",
+        "type": "no"
+    },
+    {
+        "id": 17,
+        "category": "Part 10",
+        "question": "Have you ever helped anyone to enter or try to enter the United States illegally?",
+        "type": "no"
+    },
+    {
+        "id": 18,
+        "category": "Part 10",
+        "question": "Have you ever given any U.S. Government officials any information or documentation that was false, fraudulent, or misleading?",
+        "type": "no"
+    },
+    {
+        "id": 19,
+        "category": "Part 10",
+        "question": "Have you ever been removed, excluded, or deported from the United States?",
+        "type": "no"
+    },
+    {
+        "id": 20,
+        "category": "Part 10",
+        "question": "Do you support the Constitution and form of government of the United States?",
+        "type": "yes"
+    },
+    {
+        "id": 21,
+        "category": "Part 10",
+        "question": "Do you understand the full Oath of Allegiance to the United States?",
+        "type": "yes"
+    },
+    {
+        "id": 22,
+        "category": "Part 10",
+        "question": "Are you willing to take the full Oath of Allegiance to the United States?",
+        "type": "yes"
+    },
+    {
+        "id": 23,
+        "category": "Part 10",
+        "question": "If the law requires it, are you willing to bear arms on behalf of the United States?",
+        "type": "yes"
+    },
+    {
+        "id": 24,
+        "category": "Part 10",
+        "question": "If the law requires it, are you willing to perform noncombatant services in the U.S. Armed Forces?",
+        "type": "yes"
+    },
+    {
+        "id": 25,
+        "category": "Part 10",
+        "question": "If the law requires it, are you willing to perform work of national importance under civilian direction?",
+        "type": "yes"
+    },
+    {
+        "id": 26,
+        "category": "Definitions",
+        "question": "What does it mean to 'vote'?",
+        "type": "open"
+    },
+    {
+        "id": 27,
+        "category": "Definitions",
+        "question": "What is a 'habitual drunkard'?",
+        "type": "open"
+    },
+    {
+        "id": 28,
+        "category": "Definitions",
+        "question": "What does it mean to be 'deported'?",
+        "type": "open"
+    },
+    {
+        "id": 29,
+        "category": "Definitions",
+        "question": "What does 'bear arms' mean?",
+        "type": "open"
+    },
+    {
+        "id": 30,
+        "category": "Definitions",
+        "question": "What is the 'Oath of Allegiance'?",
+        "type": "open"
+    }
+]

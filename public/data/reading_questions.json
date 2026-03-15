@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "question": "Who was the first President?"
+    },
+    {
+        "id": 2,
+        "question": "What is the capital of the United States?"
+    },
+    {
+        "id": 3,
+        "question": "Who was Abraham Lincoln?"
+    },
+    {
+        "id": 4,
+        "question": "When is Independence Day?"
+    },
+    {
+        "id": 5,
+        "question": "Who lives in the White House?"
+    },
+    {
+        "id": 6,
+        "question": "Where does Congress meet?"
+    },
+    {
+        "id": 7,
+        "question": "How many states are in the United States?"
+    },
+    {
+        "id": 8,
+        "question": "What are the colors of the American flag?"
+    },
+    {
+        "id": 9,
+        "question": "Why do people come to America?"
+    },
+    {
+        "id": 10,
+        "question": "What is the largest state?"
+    },
+    {
+        "id": 11,
+        "question": "When is Thanksgiving?"
+    },
+    {
+        "id": 12,
+        "question": "Who elects Congress?"
+    },
+    {
+        "id": 13,
+        "question": "What do we have to pay to the government?"
+    },
+    {
+        "id": 14,
+        "question": "When is Labor Day?"
+    },
+    {
+        "id": 15,
+        "question": "Who is the Father of Our Country?"
+    }
+]
