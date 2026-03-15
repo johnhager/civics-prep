@@ -60,14 +60,12 @@ function primeBrowserSpeech() {
   // Start mic just to trigger permission dialog
   if (recognition) {
     try {
-      recognition.onstart = () => {
-        // Once it successfully starts (permission granted), stop it so we can speak
-        recognition.stop();
-        recognition.onstart = null; // Reset for future use
-      };
+      // Just start it. speakQuestion or other logic will stop it when they really start.
       recognition.start();
+      // We don't stop it immediately in a callback to avoid race conditions 
+      // with the first question's own start/stop logic.
     } catch (e) {
-      // If already started or other error, just ignore
+      // Already started or blocked
     }
   }
 }
@@ -327,8 +325,9 @@ async function loadData() {
     if (allQuestions.length > 0) {
       applyLocalizedAnswers();
       updateScoreboard();
-      updateActiveDeck(); // Ensure active deck (filter/shuffle/practice) is applied
-      updateCard();
+      updateActiveDeck();
+      // Add a tiny delay for the first question to allow priming to stabilize
+      setTimeout(updateCard, 100);
     }
   } catch (err) {
     document.getElementById('q-text').textContent = "Error loading questions. Please try again.";
