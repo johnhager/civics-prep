@@ -54,6 +54,10 @@ let currentReadingIndex = 0;
 function renderMainMenu() {
   appMode = 'menu';
   isFullMock = false;
+  isPracticeTest = false;
+  isHardMode = false;
+  isShuffle = false;
+  mockPhase = 0;
   if (recognition) recognition.stop();
   window.speechSynthesis.cancel();
 
@@ -149,6 +153,12 @@ function advanceMockPhase() {
 
 function renderCivicsApp() {
   appMode = 'civics';
+  // If we aren't coming from a mock interview, reset the specific modes
+  if (!isFullMock) {
+    isPracticeTest = false;
+    isHardMode = false;
+    isShuffle = false;
+  }
   app.innerHTML = `
     <header>
       <h1>US Civics Prep</h1>
@@ -283,8 +293,8 @@ async function loadData() {
 
     if (allQuestions.length > 0) {
       applyLocalizedAnswers();
-      activeQuestions = [...allQuestions];
       updateScoreboard();
+      updateActiveDeck(); // Ensure active deck (filter/shuffle/practice) is applied
       updateCard();
     }
   } catch (err) {
