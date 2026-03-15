@@ -1151,15 +1151,15 @@ async function loadN400Data() {
     n400Questions = await res.json();
 
     // Create a mock interview deck: 
-    // 3 Background, 7 Part 10 (No), 2 Part 10 (Yes), 3 Definitions
-    const bg = n400Questions.filter(q => q.category === 'Background').sort(() => 0.5 - Math.random()).slice(0, 3);
+    // 6 Background, 7 Part 10 (No), 2 Part 10 (Yes), 5 Definitions
+    const bg = n400Questions.filter(q => q.category === 'Background').sort(() => 0.5 - Math.random()).slice(0, 6);
     const p10no = n400Questions.filter(q => q.type === 'no').sort(() => 0.5 - Math.random()).slice(0, 7);
     const p10yes = n400Questions.filter(q => q.type === 'yes').sort(() => 0.5 - Math.random()).slice(0, 2);
-    const defs = n400Questions.filter(q => q.category === 'Definitions').sort(() => 0.5 - Math.random()).slice(0, 3);
+    const defs = n400Questions.filter(q => q.category === 'Definitions').sort(() => 0.5 - Math.random()).slice(0, 5);
 
     n400Deck = [...bg, ...p10no, ...p10yes, ...defs];
     // Shuffle the deck slightly so it's not perfectly grouped, but keep background mostly early
-    const laterPart = n400Deck.slice(3).sort(() => 0.5 - Math.random());
+    const laterPart = n400Deck.slice(bg.length).sort(() => 0.5 - Math.random());
     n400Deck = [...bg, ...laterPart];
 
   } catch (err) {
@@ -1215,12 +1215,20 @@ function checkN400Answer(transcript) {
   fbEl.classList.remove('hidden');
   fbEl.className = 'special-conditions voice-feedback';
 
-  // Grade it roughly
+  // Grade it
   let isCorrect = false;
+  let expectedTypeLabel = q.type.toUpperCase();
+
   if (q.type === 'yes') {
     isCorrect = t.includes('yes') || t.includes('yeah') || t.includes('do');
   } else if (q.type === 'no') {
     isCorrect = t.includes('no') || t.includes('not') || t.includes('never');
+  } else if (q.type === 'no_or_open') {
+    isCorrect = t.length > 2; // Accept anything substantial
+    expectedTypeLabel = "YES or NO (or other names)";
+  } else if (q.type === 'keywords') {
+    isCorrect = q.keywords.some(k => t.includes(k.toLowerCase()));
+    expectedTypeLabel = "a definition using your own words";
   } else {
     // Open ended, just accept that they spoke
     isCorrect = t.length > 2;
@@ -1246,7 +1254,7 @@ function checkN400Answer(transcript) {
   } else {
     fbEl.style.backgroundColor = 'var(--color-red-light)';
     fbEl.style.color = '#B91C1C';
-    fbEl.innerHTML = `⚠️ You said: <i>"${transcript}"</i>. Expected a '${q.type.toUpperCase()}' response.`;
+    fbEl.innerHTML = `⚠️ You said: <i>"${transcript}"</i>. Expected ${expectedTypeLabel}.`;
 
     const rep = new SpeechSynthesisUtterance("Let me repeat the question.");
     setPremiumVoice(rep);

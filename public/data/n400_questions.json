@@ -9,7 +9,7 @@
         "id": 2,
         "category": "Background",
         "question": "Have you used any other names since birth?",
-        "type": "open"
+        "type": "no_or_open"
     },
     {
         "id": 3,
@@ -27,6 +27,30 @@
         "id": 5,
         "category": "Background",
         "question": "Have you taken any trips outside the United States that lasted longer than 24 hours in the past 5 years?",
+        "type": "open"
+    },
+    {
+        "id": 31,
+        "category": "Background",
+        "question": "What is your spouse's name?",
+        "type": "open"
+    },
+    {
+        "id": 32,
+        "category": "Background",
+        "question": "Where do you and your spouse live right now?",
+        "type": "open"
+    },
+    {
+        "id": 33,
+        "category": "Background",
+        "question": "When did you and your spouse get married?",
+        "type": "open"
+    },
+    {
+        "id": 34,
+        "category": "Background",
+        "question": "Where does your spouse currently work?",
         "type": "open"
     },
     {
@@ -153,30 +177,68 @@
         "id": 26,
         "category": "Definitions",
         "question": "What does it mean to 'vote'?",
-        "type": "open"
+        "type": "keywords",
+        "keywords": [
+            "elect",
+            "choose",
+            "leader",
+            "president",
+            "election"
+        ]
     },
     {
         "id": 27,
         "category": "Definitions",
         "question": "What is a 'habitual drunkard'?",
-        "type": "open"
+        "type": "keywords",
+        "keywords": [
+            "too much alcohol",
+            "alcoholic",
+            "drink too much",
+            "drinks too much",
+            "too much liquor",
+            "drinker"
+        ]
     },
     {
         "id": 28,
         "category": "Definitions",
         "question": "What does it mean to be 'deported'?",
-        "type": "open"
+        "type": "keywords",
+        "keywords": [
+            "send back",
+            "sent back",
+            "return",
+            "kick out",
+            "kicked out",
+            "leave"
+        ]
     },
     {
         "id": 29,
         "category": "Definitions",
         "question": "What does 'bear arms' mean?",
-        "type": "open"
+        "type": "keywords",
+        "keywords": [
+            "weapon",
+            "gun",
+            "carry",
+            "military",
+            "fight"
+        ]
     },
     {
         "id": 30,
         "category": "Definitions",
         "question": "What is the 'Oath of Allegiance'?",
-        "type": "open"
+        "type": "keywords",
+        "keywords": [
+            "promise",
+            "loyal",
+            "loyalty",
+            "swear",
+            "united states",
+            "true"
+        ]
     }
 ]
