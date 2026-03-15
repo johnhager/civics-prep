@@ -1,9 +1,12 @@
 import './style.css'
 
 // State
-let questions = [];
+let allQuestions = [];
+let activeQuestions = [];
 let currentIndex = 0;
 let isRevealed = false;
+let isShuffle = false;
+let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; // { id: 'right' | 'wrong' }
 
 // DOM Elements
 const app = document.querySelector('#app');
@@ -12,9 +15,21 @@ function renderApp() {
   app.innerHTML = `
     <header>
       <h1>US Civics Prep</h1>
-      <p>Study for the 2025 Naturalization Test</p>
+      <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
     </header>
     
+    <div class="top-controls">
+      <button id="shuffle-btn" class="icon-btn" title="Toggle Shuffle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+        <span>Shuffle</span>
+      </button>
+      
+      <div class="score-display">
+        <span class="score-right" title="Known">✓ <span id="count-right">0</span></span>
+        <span class="score-wrong" title="Needs Review">✗ <span id="count-wrong">0</span></span>
+      </div>
+    </div>
+
     <div class="flashcard-container">
       <div class="card" id="flashcard">
         <div class="card-header">
@@ -22,8 +37,13 @@ function renderApp() {
           <span class="category" id="q-category">Loading...</span>
         </div>
         
-        <div class="question-text" id="q-text">
-          Loading questions...
+        <div class="question-container">
+          <div class="question-text" id="q-text">
+            Loading questions...
+          </div>
+          <button id="audio-btn" class="audio-btn" title="Read Aloud">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
         </div>
         
         <div class="special-conditions hidden" id="q-conditions">
@@ -38,7 +58,15 @@ function renderApp() {
         <button id="reveal-btn" class="btn btn-primary">Reveal Answer</button>
         
         <div class="answers-section hidden" id="answers-container">
-          <!-- Answers will be injected here -->
+          <div id="answers-list"></div>
+          
+          <div class="rating-controls">
+            <p class="rating-prompt">Did you know this?</p>
+            <div class="rating-buttons">
+              <button id="btn-wrong" class="btn btn-rating btn-red">✗ Needs Review</button>
+              <button id="btn-right" class="btn btn-rating btn-green">✓ Got it!</button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -54,12 +82,16 @@ function renderApp() {
   document.getElementById('reveal-btn').addEventListener('click', revealAnswer);
   document.getElementById('prev-btn').addEventListener('click', prevQuestion);
   document.getElementById('next-btn').addEventListener('click', nextQuestion);
+  document.getElementById('shuffle-btn').addEventListener('click', toggleShuffle);
+  document.getElementById('audio-btn').addEventListener('click', speakQuestion);
+
+  document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
+  document.getElementById('btn-right').addEventListener('click', () => markAnswer('right'));
 
   // document level keybindings
   document.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'Enter') {
       if (!isRevealed) revealAnswer();
-      else nextQuestion();
     } else if (e.key === 'ArrowRight') {
       nextQuestion();
     } else if (e.key === 'ArrowLeft') {
@@ -74,9 +106,12 @@ async function loadData() {
   try {
     const res = await fetch('/data/civics_questions.json');
     if (!res.ok) throw new Error('Failed to fetch data');
-    questions = await res.json();
+    allQuestions = await res.json();
 
-    if (questions.length > 0) {
+    if (allQuestions.length > 0) {
+      applyLocalizedAnswers();
+      activeQuestions = [...allQuestions];
+      updateScoreboard();
       updateCard();
     }
   } catch (err) {
@@ -85,9 +120,70 @@ async function loadData() {
   }
 }
 
+function applyLocalizedAnswers() {
+  allQuestions.forEach(q => {
+    if (q.id === 23) { // Senators
+      q.answers = ["Patty Murray", "Maria Cantwell"];
+      q.special_conditions = null;
+    } else if (q.id === 29) { // Rep
+      q.answers = ["Depends on your congressional district. Visit house.gov to find yours."];
+      q.special_conditions = null;
+    } else if (q.id === 61) { // Governor
+      q.answers = ["Bob Ferguson"];
+      q.special_conditions = null;
+    } else if (q.id === 62) { // Capital
+      q.answers = ["Olympia"];
+      q.special_conditions = null;
+    }
+  });
+}
+
+function updateScoreboard() {
+  let right = 0;
+  let wrong = 0;
+
+  Object.values(userProgress).forEach(status => {
+    if (status === 'right') right++;
+    if (status === 'wrong') wrong++;
+  });
+
+  document.getElementById('count-right').textContent = right;
+  document.getElementById('count-wrong').textContent = wrong;
+}
+
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  const btn = document.getElementById('shuffle-btn');
+
+  if (isShuffle) {
+    btn.classList.add('active');
+    activeQuestions = [...allQuestions].sort(() => Math.random() - 0.5);
+  } else {
+    btn.classList.remove('active');
+    activeQuestions = [...allQuestions];
+  }
+
+  currentIndex = 0;
+  updateCard();
+}
+
+function speakQuestion() {
+  window.speechSynthesis.cancel(); // Stop any current speech
+  const q = activeQuestions[currentIndex];
+  // Filter out any markdown-like characters that might read awkwardly if present
+  const textToRead = q.question.replace(/[*_]/g, '');
+  const utterance = new SpeechSynthesisUtterance(textToRead);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9; // Slightly slower for clarity
+  window.speechSynthesis.speak(utterance);
+}
+
 function updateCard() {
-  const q = questions[currentIndex];
+  const q = activeQuestions[currentIndex];
   isRevealed = false;
+
+  // Stop speech if we navigate away
+  window.speechSynthesis.cancel();
 
   const idEl = document.getElementById('q-id');
   const catEl = document.getElementById('q-category');
@@ -95,6 +191,7 @@ function updateCard() {
   const condEl = document.getElementById('q-conditions');
   const condTextEl = document.getElementById('q-conditions-text');
   const ansContainer = document.getElementById('answers-container');
+  const ansList = document.getElementById('answers-list');
   const revealBtn = document.getElementById('reveal-btn');
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
@@ -104,35 +201,43 @@ function updateCard() {
   catEl.textContent = q.category;
   textEl.textContent = q.question;
 
+  // Optional status badge from previous progress
+  const pastStatus = userProgress[q.id];
+  if (pastStatus) {
+    idEl.className = \`question-id status-\${pastStatus}\`;
+  } else {
+    idEl.className = 'question-id';
+  }
+  
   if (q.special_conditions) {
     condEl.classList.remove('hidden');
     condTextEl.textContent = q.special_conditions;
   } else {
     condEl.classList.add('hidden');
   }
-
+  
   // Reset answers space
-  ansContainer.innerHTML = '';
+  ansList.innerHTML = '';
   q.answers.forEach(ans => {
     const div = document.createElement('div');
     div.className = 'answer-item';
-    div.innerHTML = `<span class="answer-bullet">•</span> <span>${ans}</span>`;
-    ansContainer.appendChild(div);
+    div.innerHTML = \`<span class="answer-bullet">•</span> <span>\${ans}</span>\`;
+    ansList.appendChild(div);
   });
-
+  
   ansContainer.classList.add('hidden');
   revealBtn.style.display = 'block';
-
+  
   // Animation reset
   const card = document.querySelector('.card');
   card.classList.remove('animate-fade-in');
   void card.offsetWidth; // trigger reflow
   card.classList.add('animate-fade-in');
-
+  
   // Update controls
   prevBtn.disabled = currentIndex === 0;
-  nextBtn.disabled = currentIndex === questions.length - 1;
-  progressEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+  nextBtn.disabled = currentIndex === activeQuestions.length - 1;
+  progressEl.textContent = \`\${currentIndex + 1} / \${activeQuestions.length}\`;
 }
 
 function revealAnswer() {
@@ -142,8 +247,23 @@ function revealAnswer() {
   document.getElementById('reveal-btn').style.display = 'none';
 }
 
+function markAnswer(status) {
+  const q = activeQuestions[currentIndex];
+  userProgress[q.id] = status;
+  localStorage.setItem('civics-progress', JSON.stringify(userProgress));
+  updateScoreboard();
+  
+  const idEl = document.getElementById('q-id');
+  idEl.className = \`question-id status-\${status}\`;
+  
+  // Automatically move to the next question if possible
+  if (currentIndex < activeQuestions.length - 1) {
+    setTimeout(nextQuestion, 250); // slight delay to feel the click
+  }
+}
+
 function nextQuestion() {
-  if (currentIndex < questions.length - 1) {
+  if (currentIndex < activeQuestions.length - 1) {
     currentIndex++;
     updateCard();
   }
