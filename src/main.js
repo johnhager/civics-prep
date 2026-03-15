@@ -132,9 +132,14 @@ function advanceMockPhase() {
   } else if (mockPhase === 2) {
     renderWritingTest();
   } else if (mockPhase === 3) {
-    // Load civics and immediately trigger practice test
+    // Ensure data is loaded before starting the test!
     renderCivicsApp();
-    setTimeout(togglePracticeTest, 100);
+    const checkReady = setInterval(() => {
+      if (allQuestions.length > 0) {
+        clearInterval(checkReady);
+        togglePracticeTest();
+      }
+    }, 100);
   } else {
     isFullMock = false;
     renderMainMenu();
@@ -839,7 +844,9 @@ async function loadReadingData() {
   try {
     const res = await fetch('/data/reading_questions.json');
     if (!res.ok) throw new Error('Failed to fetch reading data');
-    readingQuestions = await res.json();
+    const data = await res.json();
+    // Randomize for mock variety
+    readingQuestions = data.sort(() => 0.5 - Math.random());
     currentReadingIndex = 0;
     updateReadingCard();
   } catch (err) {
@@ -998,7 +1005,9 @@ async function loadWritingData() {
   try {
     const res = await fetch('/data/writing_questions.json');
     if (!res.ok) throw new Error('Failed to fetch writing data');
-    writingQuestions = await res.json();
+    const data = await res.json();
+    // Randomize for mock variety
+    writingQuestions = data.sort(() => 0.5 - Math.random());
     currentWritingIndex = 0;
     updateWritingCard();
   } catch (err) {
