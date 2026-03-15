@@ -876,7 +876,8 @@ function updateReadingCard() {
 
   document.getElementById('r-prev-btn').disabled = currentReadingIndex === 0;
   document.getElementById('r-next-btn').disabled = currentReadingIndex === readingQuestions.length - 1;
-  document.getElementById('r-progress').textContent = `${currentReadingIndex + 1} / ${readingQuestions.length}`;
+  const progressText = isFullMock ? "Mock Interview" : `${currentReadingIndex + 1} / ${readingQuestions.length}`;
+  document.getElementById('r-progress').textContent = progressText;
 }
 
 function checkReadingAnswer(transcript) {
@@ -1040,7 +1041,8 @@ function updateWritingCard() {
 
   document.getElementById('w-prev-btn').disabled = currentWritingIndex === 0;
   document.getElementById('w-next-btn').disabled = currentWritingIndex === writingQuestions.length - 1;
-  document.getElementById('w-progress').textContent = `${currentWritingIndex + 1} / ${writingQuestions.length}`;
+  const progressText = isFullMock ? "Mock Interview" : `${currentWritingIndex + 1} / ${writingQuestions.length}`;
+  document.getElementById('w-progress').textContent = progressText;
 }
 
 function checkWritingAnswer() {
