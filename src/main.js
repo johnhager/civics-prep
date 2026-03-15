@@ -57,14 +57,18 @@ function primeBrowserSpeech() {
   const silent = new SpeechSynthesisUtterance("");
   window.speechSynthesis.speak(silent);
 
-  // Start/Stop mic to trigger permission immediately
+  // Start mic just to trigger permission dialog
   if (recognition) {
     try {
+      recognition.onstart = () => {
+        // Once it successfully starts (permission granted), stop it so we can speak
+        recognition.stop();
+        recognition.onstart = null; // Reset for future use
+      };
       recognition.start();
-      setTimeout(() => {
-        try { recognition.stop(); } catch (e) { }
-      }, 100);
-    } catch (e) { }
+    } catch (e) {
+      // If already started or other error, just ignore
+    }
   }
 }
 
@@ -486,7 +490,13 @@ function speakQuestion() {
   if (isPracticeTest && activeQuestions.length === 0) return;
 
   window.speechSynthesis.cancel(); // Stop any current speech
-  if (recognition) recognition.stop();
+  if (recognition) {
+    try {
+      recognition.stop();
+    } catch (e) {
+      // Ignore if not running
+    }
+  }
   stopListeningUI();
 
   const q = activeQuestions[currentIndex];
@@ -509,31 +519,42 @@ function speakQuestion() {
 function startListening() {
   if (!recognition) return;
   try {
-    recognition.start();
-    const audioBtn = document.getElementById('audio-btn');
-    if (audioBtn) {
-      audioBtn.classList.add('listening');
-      audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
-    }
+    // Force stop first to ensure a clean start state
+    try { recognition.stop(); } catch (e) { }
 
-    // For Reading Test UI
-    const readBtn = document.getElementById('r-audio-btn');
-    if (readBtn && appMode === 'reading') {
-      readBtn.innerHTML = `Listening...`;
-      readBtn.classList.replace('btn-primary', 'btn-red');
-      readBtn.style.animation = 'pulseMic 1.5s infinite';
-    }
+    // Tiny delay to allow previous stop to process in some browser engines
+    setTimeout(() => {
+      try {
+        recognition.start();
 
-    // For N-400 Test UI
-    const n400Btn = document.getElementById('n400-action-btn');
-    if (n400Btn && appMode === 'n400') {
-      n400Btn.innerHTML = `Listening...`;
-      n400Btn.classList.replace('btn-primary', 'btn-red');
-      n400Btn.style.animation = 'pulseMic 1.5s infinite';
-      document.getElementById('n400-interviewer').innerHTML = '🗣️';
-    }
+        const audioBtn = document.getElementById('audio-btn');
+        if (audioBtn) {
+          audioBtn.classList.add('listening');
+          audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+        }
+
+        // For Reading Test UI
+        const readBtn = document.getElementById('r-audio-btn');
+        if (readBtn && appMode === 'reading') {
+          readBtn.innerHTML = `Listening...`;
+          readBtn.classList.replace('btn-primary', 'btn-red');
+          readBtn.style.animation = 'pulseMic 1.5s infinite';
+        }
+
+        // For N-400 Test UI
+        const n400Btn = document.getElementById('n400-action-btn');
+        if (n400Btn && appMode === 'n400') {
+          n400Btn.innerHTML = `Listening...`;
+          n400Btn.classList.replace('btn-primary', 'btn-red');
+          n400Btn.style.animation = 'pulseMic 1.5s infinite';
+          document.getElementById('n400-interviewer').innerHTML = '🗣️';
+        }
+      } catch (e) {
+        console.error("Delayed start failed", e);
+      }
+    }, 50);
   } catch (e) {
-    console.error("Could not start recognition", e);
+    console.error("Main startListening block failed", e);
   }
 }
 
