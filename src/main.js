@@ -627,7 +627,7 @@ function updateCard() {
   // Optional status badge from previous progress
   const pastStatus = userProgress[q.id];
   if (pastStatus) {
-    idEl.className = `question - id status - ${pastStatus} `;
+    idEl.className = `question-id status-${pastStatus}`;
   } else {
     idEl.className = 'question-id';
   }
@@ -644,7 +644,7 @@ function updateCard() {
   q.answers.forEach(ans => {
     const div = document.createElement('div');
     div.className = 'answer-item';
-    div.innerHTML = `< span class="answer-bullet" >•</span > <span>${ans}</span>`;
+    div.innerHTML = `<span class="answer-bullet">•</span> <span>${ans}</span>`;
     ansList.appendChild(div);
   });
 
