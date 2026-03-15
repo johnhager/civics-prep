@@ -7,6 +7,7 @@ let currentIndex = 0;
 let isRevealed = false;
 let isShuffle = false;
 let isHardMode = false;
+let isAutoPlay = false;
 let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; // { id: 'right' | 'wrong' }
 
 // DOM Elements
@@ -28,6 +29,11 @@ function renderApp() {
       <button id="hard-mode-btn" class="icon-btn" title="Focus on questions marked 'Needs Review'">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         <span>Needs Review</span>
+      </button>
+
+      <button id="auto-play-btn" class="icon-btn" title="Auto-play Audio">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+        <span>Auto-Play</span>
       </button>
       
       <div class="score-display">
@@ -90,6 +96,7 @@ function renderApp() {
   document.getElementById('next-btn').addEventListener('click', nextQuestion);
   document.getElementById('shuffle-btn').addEventListener('click', toggleShuffle);
   document.getElementById('hard-mode-btn').addEventListener('click', toggleHardMode);
+  document.getElementById('auto-play-btn').addEventListener('click', toggleAutoPlay);
   document.getElementById('audio-btn').addEventListener('click', speakQuestion);
 
   document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
@@ -211,6 +218,19 @@ function toggleHardMode() {
   updateActiveDeck();
 }
 
+function toggleAutoPlay() {
+  isAutoPlay = !isAutoPlay;
+  const btn = document.getElementById('auto-play-btn');
+
+  if (isAutoPlay) {
+    btn.classList.add('active');
+    speakQuestion();
+  } else {
+    btn.classList.remove('active');
+    window.speechSynthesis.cancel();
+  }
+}
+
 function speakQuestion() {
   window.speechSynthesis.cancel(); // Stop any current speech
   const q = activeQuestions[currentIndex];
@@ -284,6 +304,10 @@ function updateCard() {
   prevBtn.disabled = currentIndex === 0;
   nextBtn.disabled = currentIndex === activeQuestions.length - 1;
   progressEl.textContent = `${currentIndex + 1} / ${activeQuestions.length}`;
+
+  if (isAutoPlay) {
+    speakQuestion();
+  }
 }
 
 function revealAnswer() {
