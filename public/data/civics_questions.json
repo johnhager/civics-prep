@@ -298,7 +298,9 @@
     "id": 30,
     "category": "System of Government",
     "question": "What is the name of the Speaker of the House of Representatives now?",
-    "answers": [],
+    "answers": [
+      "Mike Johnson"
+    ],
     "special_conditions": null
   },
   {
@@ -375,14 +377,21 @@
     "id": 38,
     "category": "System of Government",
     "question": "What is the name of the President of the United States now?",
-    "answers": [],
+    "answers": [
+      "Donald J. Trump",
+      "Donald Trump"
+    ],
     "special_conditions": null
   },
   {
     "id": 39,
     "category": "System of Government",
     "question": "What is the name of the Vice President of the United States now?",
-    "answers": [],
+    "answers": [
+      "J.D. Vance",
+      "James David Vance",
+      "Vance"
+    ],
     "special_conditions": null
   },
   {
@@ -578,7 +587,10 @@
     "id": 57,
     "category": "System of Government",
     "question": "Who is the Chief Justice of the United States now?",
-    "answers": [],
+    "answers": [
+      "John Roberts",
+      "John G. Roberts, Jr."
+    ],
     "special_conditions": null
   },
   {
@@ -1115,7 +1127,7 @@
     "answers": [
       "1920",
       "After World War I",
-      "(With the) 19"
+      "(With the) 19th Amendment"
     ],
     "special_conditions": null
   },
@@ -1165,7 +1177,7 @@
     "answers": [
       "General during World War II",
       "President at the end of (during) the Korean War",
-      "34"
+      "34th President (of the United States)"
     ],
     "special_conditions": "Name one"
   },
@@ -1224,7 +1236,7 @@
     "answers": [
       "Fought for civil rights",
       "Worked for equality for all Americans",
-      "Worked to ensure that people would \u201cnot be judged by the color of their skin, but by the content"
+      "Worked to ensure that people would “not be judged by the color of their skin, but by the content of their character”"
     ],
     "special_conditions": "Name one"
   },

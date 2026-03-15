@@ -307,6 +307,14 @@ function applyLocalizedAnswers() {
     } else if (q.id === 62) { // Capital
       q.answers = ["Olympia"];
       q.special_conditions = null;
+    } else if (q.id === 30) { // Speaker
+      q.answers = ["Mike Johnson"];
+    } else if (q.id === 38) { // President
+      q.answers = ["Donald J. Trump", "Donald Trump"];
+    } else if (q.id === 39) { // VP
+      q.answers = ["J.D. Vance", "James David Vance", "Vance"];
+    } else if (q.id === 57) { // Chief Justice
+      q.answers = ["John Roberts", "John G. Roberts, Jr."];
     }
   });
 }
