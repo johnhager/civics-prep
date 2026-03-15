@@ -362,11 +362,23 @@ function checkVoiceAnswer(transcript) {
   condEl.style.color = isCorrect ? '#047857' : '#B91C1C';
   condTextEl.innerHTML = `🎙️ Heard: <i>"${transcript}"</i>`;
 
+  if (!isRevealed) revealAnswer();
+
+  window.speechSynthesis.cancel();
+
   if (isCorrect) {
-    if (!isRevealed) revealAnswer();
-    setTimeout(() => {
-      markAnswer('right');
-    }, 1500); // give them a sec to see it was correct
+    const msg = new SpeechSynthesisUtterance("Correct.");
+    msg.lang = 'en-US';
+    msg.rate = 1.0;
+    msg.onend = () => markAnswer('right');
+    window.speechSynthesis.speak(msg);
+  } else {
+    const answersText = q.answers.join(" ... or ... ");
+    const msg = new SpeechSynthesisUtterance("Needs review. Acceptable answers are: " + answersText);
+    msg.lang = 'en-US';
+    msg.rate = 0.9;
+    msg.onend = () => markAnswer('wrong');
+    window.speechSynthesis.speak(msg);
   }
 }
 
