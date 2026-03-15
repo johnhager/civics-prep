@@ -585,7 +585,7 @@ function checkVoiceAnswer(transcript) {
   if (!q) return;
 
   const normalize = (str) => {
-    return str.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+    return str.toLowerCase().replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
   };
 
   // Custom replacements for common misinterpretations / homophones
@@ -958,7 +958,7 @@ function checkReadingAnswer(transcript) {
   if (!q) return;
 
   const normalize = (str) => {
-    return str.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+    return str.toLowerCase().replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
   };
 
   const userText = normalize(transcript);
@@ -1123,7 +1123,9 @@ function checkWritingAnswer() {
   const userText = document.getElementById('w-input').value;
 
   // Normalize both by removing case and strictly non-word characters for a lenient compare
-  const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+  const normalize = (str) => {
+    return str.toLowerCase().replace(/[^a-z0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+  };
 
   const isCorrect = normalize(userText) === normalize(q.question);
 
