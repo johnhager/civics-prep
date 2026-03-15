@@ -8,6 +8,8 @@ let isRevealed = false;
 let isShuffle = false;
 let isHardMode = false;
 let isAutoPlay = false;
+let isPracticeTest = false;
+let practiceScore = { right: 0, wrong: 0, total: 20, asked: 0 };
 let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; // { id: 'right' | 'wrong' }
 
 // DOM Elements
@@ -34,6 +36,11 @@ function renderApp() {
       <button id="auto-play-btn" class="icon-btn" title="Auto-play Audio">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
         <span>Auto-Play</span>
+      </button>
+
+      <button id="practice-test-btn" class="icon-btn" title="Take a 20 question practice test">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <span>Practice Exam</span>
       </button>
       
       <div class="score-display">
@@ -97,6 +104,7 @@ function renderApp() {
   document.getElementById('shuffle-btn').addEventListener('click', toggleShuffle);
   document.getElementById('hard-mode-btn').addEventListener('click', toggleHardMode);
   document.getElementById('auto-play-btn').addEventListener('click', toggleAutoPlay);
+  document.getElementById('practice-test-btn').addEventListener('click', togglePracticeTest);
   document.getElementById('audio-btn').addEventListener('click', speakQuestion);
 
   document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
@@ -161,8 +169,8 @@ function updateScoreboard() {
     if (status === 'wrong') wrong++;
   });
 
-  document.getElementById('count-right').textContent = right;
-  document.getElementById('count-wrong').textContent = wrong;
+  document.getElementById('count-right').textContent = isPracticeTest ? practiceScore.right : right;
+  document.getElementById('count-wrong').textContent = isPracticeTest ? practiceScore.wrong : wrong;
 }
 
 function toggleShuffle() {
@@ -200,9 +208,34 @@ function updateActiveDeck() {
     deck = deck.sort(() => Math.random() - 0.5);
   }
 
+  // Apply Practice Test filter if active
+  if (isPracticeTest) {
+    deck = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 20);
+    practiceScore = { right: 0, wrong: 0, total: 20, asked: 0 };
+    updateScoreboard();
+  }
+
   activeQuestions = deck;
   currentIndex = 0;
   updateCard();
+}
+
+function togglePracticeTest() {
+  isPracticeTest = !isPracticeTest;
+  const btn = document.getElementById('practice-test-btn');
+
+  // Turn off other mutually exclusive modes
+  if (isPracticeTest) {
+    isHardMode = false;
+    isShuffle = false;
+    document.getElementById('hard-mode-btn').classList.remove('active');
+    document.getElementById('shuffle-btn').classList.remove('active');
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+
+  updateActiveDeck();
 }
 
 function toggleHardMode() {
@@ -210,6 +243,8 @@ function toggleHardMode() {
   const btn = document.getElementById('hard-mode-btn');
 
   if (isHardMode) {
+    isPracticeTest = false;
+    document.getElementById('practice-test-btn').classList.remove('active');
     btn.classList.add('active');
   } else {
     btn.classList.remove('active');
@@ -232,6 +267,9 @@ function toggleAutoPlay() {
 }
 
 function speakQuestion() {
+  // Wait to speak if they just finished the test
+  if (isPracticeTest && activeQuestions.length === 0) return;
+
   window.speechSynthesis.cancel(); // Stop any current speech
   const q = activeQuestions[currentIndex];
   // Filter out any markdown-like characters that might read awkwardly if present
@@ -243,7 +281,12 @@ function speakQuestion() {
 }
 
 function updateCard() {
-  if (activeQuestions.length === 0) return; // Prevent errors if deck is empty
+  if (activeQuestions.length === 0) {
+    if (isPracticeTest) {
+      showPracticeResults();
+    }
+    return; // Prevent errors if deck is empty
+  }
 
   const q = activeQuestions[currentIndex];
   isRevealed = false;
@@ -296,9 +339,10 @@ function updateCard() {
 
   // Animation reset
   const card = document.querySelector('.card');
-  card.classList.remove('animate-fade-in');
+  card.className = 'card animate-fade-in';
   void card.offsetWidth; // trigger reflow
-  card.classList.add('animate-fade-in');
+
+  document.querySelector('.question-container').style.display = 'flex';
 
   // Update controls
   prevBtn.disabled = currentIndex === 0;
@@ -319,12 +363,31 @@ function revealAnswer() {
 
 function markAnswer(status) {
   const q = activeQuestions[currentIndex];
-  userProgress[q.id] = status;
-  localStorage.setItem('civics-progress', JSON.stringify(userProgress));
-  updateScoreboard();
 
-  const idEl = document.getElementById('q-id');
-  idEl.className = `question-id status-${status}`;
+  if (isPracticeTest) {
+    if (status === 'right') practiceScore.right++;
+    if (status === 'wrong') practiceScore.wrong++;
+    practiceScore.asked++;
+    userProgress[q.id] = status; // Still save progress!
+    localStorage.setItem('civics-progress', JSON.stringify(userProgress));
+    updateScoreboard();
+
+    const idEl = document.getElementById('q-id');
+    idEl.className = `question-id status-${status}`;
+
+    // Check win condition
+    if (practiceScore.right >= 12 || practiceScore.wrong >= 9 || practiceScore.asked >= 20) {
+      setTimeout(showPracticeResults, 250);
+      return;
+    }
+  } else {
+    userProgress[q.id] = status;
+    localStorage.setItem('civics-progress', JSON.stringify(userProgress));
+    updateScoreboard();
+
+    const idEl = document.getElementById('q-id');
+    idEl.className = `question-id status-${status}`;
+  }
 
   // Automatically move to the next question if possible
   if (currentIndex < activeQuestions.length - 1) {
@@ -348,6 +411,43 @@ function prevQuestion() {
     currentIndex--;
     updateCard();
   }
+}
+
+function showPracticeResults() {
+  window.speechSynthesis.cancel();
+  const card = document.querySelector('.card');
+  const condEl = document.getElementById('q-conditions');
+
+  let resultTemplate = "";
+  if (practiceScore.right >= 12) {
+    resultTemplate = `
+      <div style="text-align: center; padding: 2rem;">
+        <h2 style="font-size: 2rem; color: #047857; margin-bottom: 1rem;">Congratulations! You Passed.</h2>
+        <p style="font-size: 1.25rem;">You answered 12 questions correctly.</p>
+        <p style="margin-top: 1rem; color: #64748B;">You only needed ${practiceScore.asked} to pass!</p>
+      </div>`;
+  } else {
+    resultTemplate = `
+      <div style="text-align: center; padding: 2rem;">
+        <h2 style="font-size: 2rem; color: #B91C1C; margin-bottom: 1rem;">Test Failed.</h2>
+        <p style="font-size: 1.25rem;">You did not answer enough correctly this time.</p>
+        <p style="margin-top: 1rem; color: #64748B;">Keep studying your review deck!</p>
+      </div>`;
+  }
+
+  document.getElementById('q-category').textContent = "Practice Test Complete";
+  document.getElementById('q-id').textContent = "Result";
+  document.getElementById('q-id').className = "question-id";
+  document.querySelector('.question-container').style.display = 'none';
+  document.getElementById('answers-container').classList.add('hidden');
+  document.getElementById('reveal-btn').style.display = 'none';
+  condEl.classList.remove('hidden');
+  condEl.innerHTML = resultTemplate;
+
+  // Disable controls
+  document.getElementById('prev-btn').disabled = true;
+  document.getElementById('next-btn').disabled = true;
+  document.getElementById('progress').textContent = "Finished";
 }
 
 // Initialize
