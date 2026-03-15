@@ -51,6 +51,23 @@ if (SpeechRecognition) {
 let readingQuestions = [];
 let currentReadingIndex = 0;
 
+// Helper to "unlock" speech and mic on first user gesture
+function primeBrowserSpeech() {
+  // Silent speak to unlock iOS audio
+  const silent = new SpeechSynthesisUtterance("");
+  window.speechSynthesis.speak(silent);
+
+  // Start/Stop mic to trigger permission immediately
+  if (recognition) {
+    try {
+      recognition.start();
+      setTimeout(() => {
+        try { recognition.stop(); } catch (e) { }
+      }, 100);
+    } catch (e) { }
+  }
+}
+
 function renderMainMenu() {
   appMode = 'menu';
   isFullMock = false;
@@ -110,11 +127,23 @@ function renderMainMenu() {
   </div>
 `;
 
-  document.getElementById('go-civics').addEventListener('click', renderCivicsApp);
-  document.getElementById('go-reading').addEventListener('click', renderReadingTest);
+  document.getElementById('go-civics').addEventListener('click', () => {
+    primeBrowserSpeech();
+    renderCivicsApp();
+  });
+  document.getElementById('go-reading').addEventListener('click', () => {
+    primeBrowserSpeech();
+    renderReadingTest();
+  });
   document.getElementById('go-writing').addEventListener('click', renderWritingTest);
-  document.getElementById('go-n400').addEventListener('click', renderN400Test);
-  document.getElementById('go-full-mock').addEventListener('click', startFullMock);
+  document.getElementById('go-n400').addEventListener('click', () => {
+    primeBrowserSpeech();
+    renderN400Test();
+  });
+  document.getElementById('go-full-mock').addEventListener('click', () => {
+    primeBrowserSpeech();
+    startFullMock();
+  });
 }
 
 function startFullMock() {
