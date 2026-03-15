@@ -360,6 +360,88 @@ header p {
   font-weight: 600;
   color: var(--color-text-muted);
   font-size: 0.875rem;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* --- Main Menu Styles --- */
+.menu-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.menu-card {
+  background: var(--color-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: left;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.menu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.menu-card-icon {
+  font-size: 2rem;
+  background: var(--color-accent);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.menu-card-content h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.menu-card-content p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Back Button */
+.back-btn-container {
+  max-width: 600px;
+  margin: 0 auto 1rem;
+  padding: 0 0.5rem;
+  display: flex;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: var(--color-primary);
 }
 
 .btn {

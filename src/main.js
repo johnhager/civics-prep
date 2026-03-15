@@ -1,6 +1,7 @@
 import './style.css'
 
 // State
+let appMode = 'menu'; // 'menu', 'civics', 'reading', 'writing', 'n400'
 let allQuestions = [];
 let activeQuestions = [];
 let currentIndex = 0;
@@ -26,7 +27,11 @@ if (SpeechRecognition) {
 
   recognition.onresult = (event) => {
     const transcript = event.results[0][0].transcript;
-    checkVoiceAnswer(transcript);
+    if (appMode === 'civics') {
+      checkVoiceAnswer(transcript);
+    } else if (appMode === 'reading') {
+      checkReadingAnswer(transcript);
+    }
   };
 
   recognition.onerror = (event) => {
@@ -39,13 +44,85 @@ if (SpeechRecognition) {
   };
 }
 
-function renderApp() {
+let readingQuestions = [];
+let currentReadingIndex = 0;
+
+function renderMainMenu() {
+  appMode = 'menu';
+  if (recognition) recognition.stop();
+  window.speechSynthesis.cancel();
+
   app.innerHTML = `
     <header>
       <h1>US Civics Prep</h1>
       <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
     </header>
     
+    <div class="menu-container">
+      <div class="menu-card" id="go-civics">
+        <div class="menu-card-icon">🏛️</div>
+        <div class="menu-card-content">
+          <h3>Civics Study Flashcards</h3>
+          <p>Practice the 128 official questions or take a randomized 20-question practice exam.</p>
+        </div>
+      </div>
+      
+      <div class="menu-card" id="go-reading">
+        <div class="menu-card-icon">📖</div>
+        <div class="menu-card-content">
+          <h3>Reading Test Practice</h3>
+          <p>Practice reading English sentences aloud with precise voice recognition grading.</p>
+        </div>
+      </div>
+      
+      <div class="menu-card" id="go-writing">
+        <div class="menu-card-icon">✍️</div>
+        <div class="menu-card-content">
+          <h3>Writing Test Practice</h3>
+          <p>Listen to an English sentence and practice typing it out correctly.</p>
+        </div>
+      </div>
+      
+      <div class="menu-card" id="go-n400">
+        <div class="menu-card-icon">🇺🇸</div>
+        <div class="menu-card-content">
+          <h3>N-400 Review Simulator</h3>
+          <p>Mock interview covering your application and the 'Yes/No' moral character questions.</p>
+        </div>
+      </div>
+      
+      <div class="menu-card" id="go-full-mock">
+        <div class="menu-card-icon">🎓</div>
+        <div class="menu-card-content">
+          <h3>Full Mock Interview</h3>
+          <p>A back-to-back simulation of all four interview components.</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('go-civics').addEventListener('click', renderCivicsApp);
+  document.getElementById('go-reading').addEventListener('click', renderReadingTest);
+  document.getElementById('go-writing').addEventListener('click', () => alert("Coming soon!"));
+  document.getElementById('go-n400').addEventListener('click', () => alert("Coming soon!"));
+  document.getElementById('go-full-mock').addEventListener('click', () => alert("Coming soon!"));
+}
+
+function renderCivicsApp() {
+  appMode = 'civics';
+  app.innerHTML = `
+    <header>
+      <h1>US Civics Prep</h1>
+      <p>Study for the 2025 Naturalization Test <span class="wa-badge">Washington State</span></p>
+    </header>
+    
+    <div class="back-btn-container">
+      <button class="back-btn" id="back-to-menu-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Menu
+      </button>
+    </div>
+
     <div class="top-controls">
       <button id="shuffle-btn" class="icon-btn" title="Toggle Shuffle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
@@ -122,6 +199,7 @@ function renderApp() {
   `;
 
   // Bind events
+  document.getElementById('back-to-menu-btn').addEventListener('click', renderMainMenu);
   document.getElementById('reveal-btn').addEventListener('click', revealAnswer);
   document.getElementById('prev-btn').addEventListener('click', prevQuestion);
   document.getElementById('next-btn').addEventListener('click', nextQuestion);
@@ -134,18 +212,24 @@ function renderApp() {
   document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
   document.getElementById('btn-right').addEventListener('click', () => markAnswer('right'));
 
-  // document level keybindings
-  document.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      if (!isRevealed) revealAnswer();
-    } else if (e.key === 'ArrowRight') {
-      nextQuestion();
-    } else if (e.key === 'ArrowLeft') {
-      prevQuestion();
-    }
-  });
+  // Use a named function for the keydown listener so we can easily add/remove it if needed later,
+  // but for now document listener is okay since civics is the only app using spacebar right now.
+  document.addEventListener('keydown', handleCivicsKeydown);
 
   loadData();
+}
+
+function handleCivicsKeydown(e) {
+  // Only handle if we're actually in the civics view
+  if (!document.getElementById('reveal-btn')) return;
+
+  if (e.key === ' ' || e.key === 'Enter') {
+    if (!isRevealed) revealAnswer();
+  } else if (e.key === 'ArrowRight') {
+    nextQuestion();
+  } else if (e.key === 'ArrowLeft') {
+    prevQuestion();
+  }
 }
 
 async function loadData() {
@@ -337,8 +421,18 @@ function startListening() {
   try {
     recognition.start();
     const audioBtn = document.getElementById('audio-btn');
-    audioBtn.classList.add('listening');
-    audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+    if (audioBtn) {
+      audioBtn.classList.add('listening');
+      audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+    }
+
+    // For Reading Test UI
+    const readBtn = document.getElementById('r-audio-btn');
+    if (readBtn && appMode === 'reading') {
+      readBtn.innerHTML = `Listening...`;
+      readBtn.classList.replace('btn-primary', 'btn-red');
+      readBtn.style.animation = 'pulseMic 1.5s infinite';
+    }
   } catch (e) {
     console.error("Could not start recognition", e);
   }
@@ -349,6 +443,13 @@ function stopListeningUI() {
   if (audioBtn) {
     audioBtn.classList.remove('listening');
     audioBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+  }
+
+  const readBtn = document.getElementById('r-audio-btn');
+  if (readBtn && appMode === 'reading') {
+    readBtn.innerHTML = `🎙️ Tap to Speak`;
+    readBtn.classList.replace('btn-red', 'btn-primary');
+    readBtn.style.animation = 'none';
   }
 }
 
@@ -612,5 +713,139 @@ function showPracticeResults() {
   document.getElementById('progress').textContent = "Finished";
 }
 
+
+// --- Reading Test Logic ---
+
+function renderReadingTest() {
+  appMode = 'reading';
+  app.innerHTML = `
+  < header >
+      <h1>Reading Test</h1>
+      <p>Please read the following sentence aloud.</p>
+    </header >
+    
+    <div class="back-btn-container">
+      <button class="back-btn" id="back-to-menu-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Menu
+      </button>
+    </div>
+
+    <div class="flashcard-container">
+      <div class="card">
+        <div class="question-container" style="justify-content: center; text-align: center; padding: 2rem 0; min-height: 8rem; align-items: center;">
+          <div class="question-text" id="r-text" style="font-size: 2rem; font-weight: normal;">Loading...</div>
+        </div>
+        
+        <div class="special-conditions hidden" id="r-conditions" style="text-align: center; justify-content: center;">
+           <span id="r-conditions-text"></span>
+        </div>
+
+        <button id="r-audio-btn" class="btn btn-primary" style="display: flex; gap: 0.5rem; justify-content: center; align-items: center; width: 100%; font-size: 1.1rem; padding: 1rem;">
+          🎙️ Tap to Speak
+        </button>
+      </div>
+
+      <div class="controls">
+        <button id="r-prev-btn" class="btn btn-secondary" disabled>← Previous</button>
+        <div id="r-progress" class="progress">-- / --</div>
+        <button id="r-next-btn" class="btn btn-secondary" disabled>Next →</button>
+      </div>
+    </div>
+`;
+  document.getElementById('back-to-menu-btn').addEventListener('click', renderMainMenu);
+  document.getElementById('r-audio-btn').addEventListener('click', () => {
+    if (recognition) startListening();
+    else alert("Speech Recognition is not supported on this browser.");
+  });
+
+  document.getElementById('r-prev-btn').addEventListener('click', () => {
+    if (currentReadingIndex > 0) { currentReadingIndex--; updateReadingCard(); }
+  });
+  document.getElementById('r-next-btn').addEventListener('click', () => {
+    if (currentReadingIndex < readingQuestions.length - 1) { currentReadingIndex++; updateReadingCard(); }
+  });
+
+  loadReadingData();
+}
+
+async function loadReadingData() {
+  try {
+    const res = await fetch('/data/reading_questions.json');
+    if (!res.ok) throw new Error('Failed to fetch reading data');
+    readingQuestions = await res.json();
+    currentReadingIndex = 0;
+    updateReadingCard();
+  } catch (err) {
+    document.getElementById('r-text').textContent = "Error loading sentences.";
+    console.error(err);
+  }
+}
+
+function updateReadingCard() {
+  if (readingQuestions.length === 0) return;
+  const q = readingQuestions[currentReadingIndex];
+
+  document.getElementById('r-text').textContent = q.question;
+
+  const condEl = document.getElementById('r-conditions');
+  condEl.classList.add('hidden');
+  condEl.style.backgroundColor = '';
+  condEl.style.color = '';
+
+  document.getElementById('r-prev-btn').disabled = currentReadingIndex === 0;
+  document.getElementById('r-next-btn').disabled = currentReadingIndex === readingQuestions.length - 1;
+  document.getElementById('r-progress').textContent = `${currentReadingIndex + 1} / ${readingQuestions.length}`;
+}
+
+function checkReadingAnswer(transcript) {
+  const q = readingQuestions[currentReadingIndex];
+  if (!q) return;
+
+  const normalize = (str) => {
+    return str.toLowerCase().replace(/[^\w\s]/gi, '').trim();
+  };
+
+  const userText = normalize(transcript);
+  const targetText = normalize(q.question);
+
+  // They just have to read it. Let's do a fuzzy comparison.
+  // Count how many words they hit right.
+  const targetWords = targetText.split(' ');
+  const matchCount = targetWords.filter(w => userText.includes(w)).length;
+
+  // If they hit 75%+ of the words, we count it as a successful reading.
+  const isCorrect = (matchCount / targetWords.length) >= 0.75;
+
+  const condEl = document.getElementById('r-conditions');
+  const condTextEl = document.getElementById('r-conditions-text');
+
+  condEl.classList.remove('hidden');
+  condEl.className = 'special-conditions voice-feedback';
+  condEl.style.backgroundColor = isCorrect ? 'var(--color-green-light)' : 'var(--color-red-light)';
+  condEl.style.color = isCorrect ? '#047857' : '#B91C1C';
+  condTextEl.innerHTML = `🎙️ Heard: <i>"${transcript}"</i>`;
+
+  if (isCorrect) {
+    const msg = new SpeechSynthesisUtterance("Passed.");
+    msg.lang = 'en-US';
+    msg.rate = 1.0;
+    setPremiumVoice(msg);
+    msg.onend = () => {
+      if (currentReadingIndex < readingQuestions.length - 1) {
+        currentReadingIndex++;
+        updateReadingCard();
+      }
+    };
+    window.speechSynthesis.speak(msg);
+  } else {
+    const msg = new SpeechSynthesisUtterance("Did not hear you read the sentence clearly. Please try again.");
+    msg.lang = 'en-US';
+    msg.rate = 0.9;
+    setPremiumVoice(msg);
+    window.speechSynthesis.speak(msg);
+  }
+}
+
 // Initialize
-renderApp();
+renderMainMenu();
