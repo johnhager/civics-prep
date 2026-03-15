@@ -6,6 +6,7 @@ let activeQuestions = [];
 let currentIndex = 0;
 let isRevealed = false;
 let isShuffle = false;
+let isHardMode = false;
 let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; // { id: 'right' | 'wrong' }
 
 // DOM Elements
@@ -22,6 +23,11 @@ function renderApp() {
       <button id="shuffle-btn" class="icon-btn" title="Toggle Shuffle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
         <span>Shuffle</span>
+      </button>
+
+      <button id="hard-mode-btn" class="icon-btn" title="Focus on questions marked 'Needs Review'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span>Needs Review</span>
       </button>
       
       <div class="score-display">
@@ -83,6 +89,7 @@ function renderApp() {
   document.getElementById('prev-btn').addEventListener('click', prevQuestion);
   document.getElementById('next-btn').addEventListener('click', nextQuestion);
   document.getElementById('shuffle-btn').addEventListener('click', toggleShuffle);
+  document.getElementById('hard-mode-btn').addEventListener('click', toggleHardMode);
   document.getElementById('audio-btn').addEventListener('click', speakQuestion);
 
   document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
@@ -167,6 +174,43 @@ function toggleShuffle() {
   updateCard();
 }
 
+function updateActiveDeck() {
+  let deck = [...allQuestions];
+
+  // Apply "Needs Review" filter if active
+  if (isHardMode) {
+    deck = deck.filter(q => userProgress[q.id] === 'wrong');
+    // If they have no wrong questions, alert them and turn off Hard Mode
+    if (deck.length === 0) {
+      alert("You don't have any questions marked 'Needs Review'! Great job.");
+      toggleHardMode(); // toggle it back off
+      return;
+    }
+  }
+
+  // Apply "Shuffle" filter if active
+  if (isShuffle) {
+    deck = deck.sort(() => Math.random() - 0.5);
+  }
+
+  activeQuestions = deck;
+  currentIndex = 0;
+  updateCard();
+}
+
+function toggleHardMode() {
+  isHardMode = !isHardMode;
+  const btn = document.getElementById('hard-mode-btn');
+
+  if (isHardMode) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+
+  updateActiveDeck();
+}
+
 function speakQuestion() {
   window.speechSynthesis.cancel(); // Stop any current speech
   const q = activeQuestions[currentIndex];
@@ -179,6 +223,8 @@ function speakQuestion() {
 }
 
 function updateCard() {
+  if (activeQuestions.length === 0) return; // Prevent errors if deck is empty
+
   const q = activeQuestions[currentIndex];
   isRevealed = false;
 
@@ -259,6 +305,10 @@ function markAnswer(status) {
   // Automatically move to the next question if possible
   if (currentIndex < activeQuestions.length - 1) {
     setTimeout(nextQuestion, 250); // slight delay to feel the click
+  } else if (isHardMode && status === 'right') {
+    // If we are at the end of the Hard Mode deck, and just got the last one right,
+    // the array will shrink next time we update the deck. Re-evaluate deck.
+    setTimeout(updateActiveDeck, 250);
   }
 }
 
