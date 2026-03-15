@@ -1106,7 +1106,7 @@ function renderN400Test() {
   app.innerHTML = `
     <header>
       <h1>N-400 Simulator</h1>
-      <p>Mock interview for your application strings.</p>
+      <p>Mock interview for your application details.</p>
     </header>
     
     <div class="back-btn-container">
