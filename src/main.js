@@ -2,6 +2,8 @@ import './style.css'
 
 // State
 let appMode = 'menu'; // 'menu', 'civics', 'reading', 'writing', 'n400'
+let isFullMock = false;
+let mockPhase = 0; // 0: N400, 1: Reading, 2: Writing, 3: Civics Practice
 let allQuestions = [];
 let activeQuestions = [];
 let currentIndex = 0;
@@ -31,6 +33,8 @@ if (SpeechRecognition) {
       checkVoiceAnswer(transcript);
     } else if (appMode === 'reading') {
       checkReadingAnswer(transcript);
+    } else if (appMode === 'n400') {
+      checkN400Answer(transcript);
     }
   };
 
@@ -49,6 +53,7 @@ let currentReadingIndex = 0;
 
 function renderMainMenu() {
   appMode = 'menu';
+  isFullMock = false;
   if (recognition) recognition.stop();
   window.speechSynthesis.cancel();
 
@@ -104,8 +109,37 @@ function renderMainMenu() {
   document.getElementById('go-civics').addEventListener('click', renderCivicsApp);
   document.getElementById('go-reading').addEventListener('click', renderReadingTest);
   document.getElementById('go-writing').addEventListener('click', renderWritingTest);
-  document.getElementById('go-n400').addEventListener('click', () => alert("Coming soon!"));
-  document.getElementById('go-full-mock').addEventListener('click', () => alert("Coming soon!"));
+  document.getElementById('go-n400').addEventListener('click', renderN400Test);
+  document.getElementById('go-full-mock').addEventListener('click', startFullMock);
+}
+
+function startFullMock() {
+  isFullMock = true;
+  mockPhase = 0;
+  renderN400Test();
+
+  setTimeout(() => {
+    const msg = new SpeechSynthesisUtterance("Welcome to your mock interview. We will begin with your N-400 review, followed by the reading test, writing test, and civics test. Please press start interview when you are ready.");
+    setPremiumVoice(msg);
+    window.speechSynthesis.speak(msg);
+  }, 500);
+}
+
+function advanceMockPhase() {
+  mockPhase++;
+  if (mockPhase === 1) {
+    renderReadingTest();
+  } else if (mockPhase === 2) {
+    renderWritingTest();
+  } else if (mockPhase === 3) {
+    // Load civics and immediately trigger practice test
+    renderCivicsApp();
+    setTimeout(togglePracticeTest, 100);
+  } else {
+    isFullMock = false;
+    renderMainMenu();
+    alert("Mock Interview Complete!");
+  }
 }
 
 function renderCivicsApp() {
@@ -433,6 +467,15 @@ function startListening() {
       readBtn.classList.replace('btn-primary', 'btn-red');
       readBtn.style.animation = 'pulseMic 1.5s infinite';
     }
+
+    // For N-400 Test UI
+    const n400Btn = document.getElementById('n400-action-btn');
+    if (n400Btn && appMode === 'n400') {
+      n400Btn.innerHTML = `Listening...`;
+      n400Btn.classList.replace('btn-primary', 'btn-red');
+      n400Btn.style.animation = 'pulseMic 1.5s infinite';
+      document.getElementById('n400-interviewer').innerHTML = '🗣️';
+    }
   } catch (e) {
     console.error("Could not start recognition", e);
   }
@@ -450,6 +493,14 @@ function stopListeningUI() {
     readBtn.innerHTML = `🎙️ Tap to Speak`;
     readBtn.classList.replace('btn-red', 'btn-primary');
     readBtn.style.animation = 'none';
+  }
+
+  const n400Btn = document.getElementById('n400-action-btn');
+  if (n400Btn && appMode === 'n400') {
+    n400Btn.innerHTML = `Tap to Answer (if audio stopped)`;
+    n400Btn.classList.replace('btn-red', 'btn-primary');
+    n400Btn.style.animation = 'none';
+    document.getElementById('n400-interviewer').innerHTML = '👩‍⚖️';
   }
 }
 
@@ -711,6 +762,11 @@ function showPracticeResults() {
   document.getElementById('prev-btn').disabled = true;
   document.getElementById('next-btn').disabled = true;
   document.getElementById('progress').textContent = "Finished";
+
+  if (isFullMock) {
+    document.getElementById('q-category').textContent += " (Continuing to next phase in 5s...)";
+    setTimeout(advanceMockPhase, 5000);
+  }
 }
 
 
@@ -835,6 +891,10 @@ function checkReadingAnswer(transcript) {
       if (currentReadingIndex < readingQuestions.length - 1) {
         currentReadingIndex++;
         updateReadingCard();
+      } else if (isFullMock) {
+        setTimeout(advanceMockPhase, 2000);
+      } else {
+        document.getElementById('r-progress').textContent = "Finished";
       }
     };
     window.speechSynthesis.speak(msg);
@@ -990,6 +1050,10 @@ function checkWritingAnswer() {
       if (currentWritingIndex < writingQuestions.length - 1) {
         currentWritingIndex++;
         updateWritingCard();
+      } else if (isFullMock) {
+        advanceMockPhase();
+      } else {
+        document.getElementById('w-progress').textContent = "Finished";
       }
     }, 2000);
   } else {
@@ -1017,6 +1081,180 @@ function revealWritingAnswer() {
   document.getElementById('w-input').disabled = true;
   document.getElementById('w-check-btn').style.display = "none";
   document.getElementById('w-reveal-btn').style.display = "none";
+}
+
+// --- N-400 Review Simulator Logic ---
+let n400Questions = [];
+let n400Deck = [];
+let currentN400Index = 0;
+
+function renderN400Test() {
+  appMode = 'n400';
+  if (recognition) recognition.stop();
+  window.speechSynthesis.cancel();
+
+  app.innerHTML = `
+    <header>
+      <h1>N-400 Simulator</h1>
+      <p>Mock interview for your application strings.</p>
+    </header>
+    
+    <div class="back-btn-container">
+      <button class="back-btn" id="back-to-menu-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Menu
+      </button>
+    </div>
+
+    <div class="flashcard-container">
+      <div class="card" style="text-align: center; padding: 2.5rem 1.5rem;">
+         <div id="n400-interviewer" style="font-size: 5rem; margin-bottom: 1rem; transition: all 0.2s;">👩‍⚖️</div>
+         <h2 id="n400-category" style="color: var(--color-primary); margin-bottom: 1rem; font-size: 1.5rem;">Ready to begin</h2>
+         
+         <p id="n400-question-text" style="font-size: 1.25rem; min-height: 4rem; margin-bottom: 1rem; color: var(--color-text-muted); font-style: italic;">
+            Click "Start Interview" when you are ready.
+         </p>
+         
+         <div id="n400-feedback" class="special-conditions hidden" style="margin-bottom: 1.5rem; justify-content: center;"></div>
+
+         <button id="n400-action-btn" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+            Start Interview
+         </button>
+      </div>
+      
+      <div class="controls">
+         <div id="n400-progress" class="progress" style="width: 100%;">-- / --</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('back-to-menu-btn').addEventListener('click', renderMainMenu);
+
+  document.getElementById('n400-action-btn').addEventListener('click', () => {
+    const btn = document.getElementById('n400-action-btn');
+    if (btn.innerText.includes("Start")) {
+      currentN400Index = 0;
+      askN400Question();
+    } else {
+      // Fallback if voice gets stuck
+      if (recognition) startListening();
+    }
+  });
+
+  loadN400Data();
+}
+
+async function loadN400Data() {
+  try {
+    const res = await fetch('/data/n400_questions.json');
+    if (!res.ok) throw new Error('Failed to fetch N400 data');
+    n400Questions = await res.json();
+
+    // Create a mock interview deck: 
+    // 3 Background, 7 Part 10 (No), 2 Part 10 (Yes), 3 Definitions
+    const bg = n400Questions.filter(q => q.category === 'Background').sort(() => 0.5 - Math.random()).slice(0, 3);
+    const p10no = n400Questions.filter(q => q.type === 'no').sort(() => 0.5 - Math.random()).slice(0, 7);
+    const p10yes = n400Questions.filter(q => q.type === 'yes').sort(() => 0.5 - Math.random()).slice(0, 2);
+    const defs = n400Questions.filter(q => q.category === 'Definitions').sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    n400Deck = [...bg, ...p10no, ...p10yes, ...defs];
+    // Shuffle the deck slightly so it's not perfectly grouped, but keep background mostly early
+    const laterPart = n400Deck.slice(3).sort(() => 0.5 - Math.random());
+    n400Deck = [...bg, ...laterPart];
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function askN400Question() {
+  if (currentN400Index >= n400Deck.length) {
+    document.getElementById('n400-category').textContent = "Interview Complete";
+    document.getElementById('n400-question-text').textContent = "You have finished the N-400 review portion.";
+    if (isFullMock) {
+      document.getElementById('n400-question-text').textContent += " Continuing to next phase...";
+      setTimeout(advanceMockPhase, 3000);
+    }
+    document.getElementById('n400-action-btn').style.display = 'none';
+    document.getElementById('n400-feedback').classList.add('hidden');
+    return;
+  }
+
+  const q = n400Deck[currentN400Index];
+
+  document.getElementById('n400-category').textContent = q.category;
+  document.getElementById('n400-question-text').textContent = "(Listening...)";
+  document.getElementById('n400-progress').textContent = `${currentN400Index + 1} / ${n400Deck.length}`;
+
+  const fbEl = document.getElementById('n400-feedback');
+  fbEl.classList.add('hidden');
+
+  document.getElementById('n400-action-btn').textContent = "Repeat Question";
+
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(q.question);
+  msg.lang = 'en-US';
+  msg.rate = 1.0;
+  // Use a different premium voice specifically for the interviewer? We'll just use default premium
+  setPremiumVoice(msg);
+
+  msg.onend = () => {
+    if (appMode === 'n400' && recognition) {
+      startListening();
+    }
+  };
+
+  window.speechSynthesis.speak(msg);
+}
+
+function checkN400Answer(transcript) {
+  const q = n400Deck[currentN400Index];
+  const t = transcript.toLowerCase();
+
+  const fbEl = document.getElementById('n400-feedback');
+  fbEl.classList.remove('hidden');
+  fbEl.className = 'special-conditions voice-feedback';
+
+  // Grade it roughly
+  let isCorrect = false;
+  if (q.type === 'yes') {
+    isCorrect = t.includes('yes') || t.includes('yeah') || t.includes('do');
+  } else if (q.type === 'no') {
+    isCorrect = t.includes('no') || t.includes('not') || t.includes('never');
+  } else {
+    // Open ended, just accept that they spoke
+    isCorrect = t.length > 2;
+  }
+
+  document.getElementById('n400-question-text').textContent = `"${q.question}"`;
+
+  if (isCorrect) {
+    fbEl.style.backgroundColor = 'var(--color-green-light)';
+    fbEl.style.color = '#047857';
+    fbEl.innerHTML = `✅ You said: <i>"${transcript}"</i>`;
+
+    const phrases = ["Okay.", "Thank you.", "Moving on.", "Alright."];
+    const ack = new SpeechSynthesisUtterance(phrases[Math.floor(Math.random() * phrases.length)]);
+    setPremiumVoice(ack);
+    ack.rate = 1.1;
+
+    currentN400Index++;
+    ack.onend = () => {
+      setTimeout(askN400Question, 1000);
+    };
+    window.speechSynthesis.speak(ack);
+  } else {
+    fbEl.style.backgroundColor = 'var(--color-red-light)';
+    fbEl.style.color = '#B91C1C';
+    fbEl.innerHTML = `⚠️ You said: <i>"${transcript}"</i>. Expected a '${q.type.toUpperCase()}' response.`;
+
+    const rep = new SpeechSynthesisUtterance("Let me repeat the question.");
+    setPremiumVoice(rep);
+    rep.onend = () => {
+      setTimeout(askN400Question, 500);
+    };
+    window.speechSynthesis.speak(rep);
+  }
 }
 
 // Initialize
