@@ -10,7 +10,7 @@ let currentIndex = 0;
 let isRevealed = false;
 let isShuffle = false;
 let isHardMode = false;
-let isAutoPlay = false;
+let isAutoPlay = true;
 let isPracticeTest = false;
 let practiceScore = { right: 0, wrong: 0, total: 20, asked: 0 };
 let userProgress = JSON.parse(localStorage.getItem('civics-progress')) || {}; // { id: 'right' | 'wrong' }
@@ -245,6 +245,10 @@ function renderCivicsApp() {
 
   document.getElementById('btn-wrong').addEventListener('click', () => markAnswer('wrong'));
   document.getElementById('btn-right').addEventListener('click', () => markAnswer('right'));
+
+  if (isAutoPlay) {
+    document.getElementById('auto-play-btn').classList.add('active');
+  }
 
   // Use a named function for the keydown listener so we can easily add/remove it if needed later,
   // but for now document listener is okay since civics is the only app using spacebar right now.
