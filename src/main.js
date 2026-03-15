@@ -360,14 +360,46 @@ function checkVoiceAnswer(transcript) {
     return str.toLowerCase().replace(/[^\w\s]/gi, '').trim();
   };
 
-  const userText = normalize(transcript);
+  // Custom replacements for common misinterpretations / homophones
+  let rawTranscript = transcript;
+  rawTranscript = rawTranscript.replace(/hi texas/gi, "high taxes");
+  rawTranscript = rawTranscript.replace(/free speech/gi, "freedom of speech");
+  rawTranscript = rawTranscript.replace(/free religion/gi, "freedom of religion");
+  rawTranscript = rawTranscript.replace(/george washington/gi, "washington");
+
+  const userText = normalize(rawTranscript);
   let isCorrect = false;
+
+  const getKeywords = (str) => {
+    const stops = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'to', 'for', 'in', 'on', 'of', 'and', 'or', 'by', 'with']);
+    return str.split(' ').filter(w => w.length > 2 && !stops.has(w));
+  };
 
   for (const ans of q.answers) {
     const normAns = normalize(ans);
-    if (userText.includes(normAns) || (normAns.includes(userText) && userText.length > 3)) {
+    // 1. Direct or robust substring match
+    if (userText.includes(normAns) || (normAns.includes(userText) && userText.length > 4)) {
       isCorrect = true;
       break;
+    }
+
+    // 2. Fuzzy Keyword matching approach
+    const ansKeywords = getKeywords(normAns);
+    if (ansKeywords.length > 0) {
+      // How many of the answer's key words did the user say?
+      const matchCount = ansKeywords.filter(kw => userText.includes(kw)).length;
+
+      // If they hit all the core keywords, count it!
+      if (matchCount === ansKeywords.length) {
+        isCorrect = true;
+        break;
+      }
+
+      // Allow 1 missing keyword if the answer has 3 or more keywords
+      if (ansKeywords.length >= 3 && matchCount >= ansKeywords.length - 1) {
+        isCorrect = true;
+        break;
+      }
     }
   }
 
