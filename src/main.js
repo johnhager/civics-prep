@@ -898,11 +898,11 @@ function checkReadingAnswer(transcript) {
     msg.rate = 1.0;
     setPremiumVoice(msg);
     msg.onend = () => {
-      if (currentReadingIndex < readingQuestions.length - 1) {
+      if (isFullMock) {
+        setTimeout(advanceMockPhase, 1500);
+      } else if (currentReadingIndex < readingQuestions.length - 1) {
         currentReadingIndex++;
         updateReadingCard();
-      } else if (isFullMock) {
-        setTimeout(advanceMockPhase, 2000);
       } else {
         document.getElementById('r-progress').textContent = "Finished";
       }
@@ -1057,11 +1057,11 @@ function checkWritingAnswer() {
     window.speechSynthesis.speak(msg);
 
     setTimeout(() => {
-      if (currentWritingIndex < writingQuestions.length - 1) {
+      if (isFullMock) {
+        advanceMockPhase();
+      } else if (currentWritingIndex < writingQuestions.length - 1) {
         currentWritingIndex++;
         updateWritingCard();
-      } else if (isFullMock) {
-        advanceMockPhase();
       } else {
         document.getElementById('w-progress').textContent = "Finished";
       }
