@@ -573,7 +573,10 @@ function stopListeningUI() {
 
   const n400Btn = document.getElementById('n400-action-btn');
   if (n400Btn && appMode === 'n400') {
-    n400Btn.innerHTML = `Tap to Answer (if audio stopped)`;
+    // Only overwrite if we aren't at the "Start Interview" screen
+    if (!n400Btn.textContent.includes("Start Interview")) {
+      n400Btn.innerHTML = `Tap to Answer (if audio stopped)`;
+    }
     n400Btn.classList.replace('btn-red', 'btn-primary');
     n400Btn.style.animation = 'none';
     document.getElementById('n400-interviewer').innerHTML = '👩‍⚖️';
