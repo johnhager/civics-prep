@@ -1374,3 +1374,13 @@ function checkN400Answer(transcript) {
 
 // Initialize
 renderMainMenu();
+
+// Register minimal service worker for PWA installation support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (registration) => console.log('ServiceWorker registration successful:', registration.scope),
+      (err) => console.log('ServiceWorker registration failed:', err)
+    );
+  });
+}
